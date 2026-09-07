@@ -53,7 +53,7 @@ def main():
             ], np.int32)
 
         # Run YOLO tracking
-        results = model.track(frame, persist=True, verbose=False)
+        results = model.track(frame, persist=True, conf=0.5, verbose=False)
 
         # Draw the restricted zone
         cv2.polylines(frame, [restricted_zone_polygon], isClosed=True, color=(0, 0, 255), thickness=2)
@@ -74,6 +74,9 @@ def main():
                 # Class name
                 cls_id = int(box.cls[0])
                 cls_name = model.names[cls_id]
+
+                if cls_name != "person":
+                    continue
 
                 # Track ID
                 track_id = int(box.id[0]) if box.id is not None else None
