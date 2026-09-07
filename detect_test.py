@@ -4,9 +4,6 @@ from ultralytics import YOLO
 import numpy as np
 import datetime
 
-# Define a restricted zone as a polygon (roughly bottom-right quarter of a 1280x720 frame)
-RESTRICTED_ZONE_POLYGON = np.array([[640, 360], [1280, 360], [1280, 720], [640, 720]], np.int32)
-
 def main():
     parser = argparse.ArgumentParser(description="BORDER-X YOLOv8 Object Detection Test")
     parser.add_argument("video_source", nargs="?", default="0", help="Path to video file or webcam index (default: 0)")
@@ -35,6 +32,7 @@ def main():
 
     zone_status = {} # Track ID -> bool (is_inside)
     frame_count = 0
+    restricted_zone_polygon = None
 
     while True:
         ret, frame = cap.read()
@@ -43,16 +41,23 @@ def main():
             break
 
         frame_count += 1
-        if frame_count % 30 == 0:
-            print(f"[DEBUG] Frame shape: {frame.shape}")
+
+        if restricted_zone_polygon is None:
+            height, width = frame.shape[:2]
+            x_mid, y_mid = width // 2, height // 2
+            restricted_zone_polygon = np.array([
+                [x_mid, y_mid],
+                [width, y_mid],
+                [width, height],
+                [x_mid, height]
+            ], np.int32)
 
         # Run YOLO tracking
         results = model.track(frame, persist=True, verbose=False)
 
         # Draw the restricted zone
-        print(f"[DEBUG] Drawing zone at coordinates: {RESTRICTED_ZONE_POLYGON.tolist()}")
-        cv2.polylines(frame, [RESTRICTED_ZONE_POLYGON], isClosed=True, color=(0, 0, 255), thickness=2)
-        cv2.putText(frame, "RESTRICTED ZONE", (RESTRICTED_ZONE_POLYGON[0][0], RESTRICTED_ZONE_POLYGON[0][1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+        cv2.polylines(frame, [restricted_zone_polygon], isClosed=True, color=(0, 0, 255), thickness=2)
+        cv2.putText(frame, "RESTRICTED ZONE", (restricted_zone_polygon[0][0], restricted_zone_polygon[0][1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
 
         for result in results:
             boxes = result.boxes
@@ -84,8 +89,7 @@ def main():
                     y_bottom = y2
                     
                     # Check if inside polygon
-                    test_result = cv2.pointPolygonTest(RESTRICTED_ZONE_POLYGON, (x_center, y_bottom), False)
-                    print(f"[DEBUG] Track ID: {track_id} | Ref Point: ({x_center}, {y_bottom}) | pointPolygonTest: {test_result}")
+                    test_result = cv2.pointPolygonTest(restricted_zone_polygon, (x_center, y_bottom), False)
                     is_inside = test_result >= 0
                     was_inside = zone_status.get(track_id, False)
                     
