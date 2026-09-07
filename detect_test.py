@@ -53,7 +53,9 @@ def main():
             ], np.int32)
 
         # Run YOLO tracking
-        results = model.track(frame, persist=True, conf=0.5, verbose=False)
+        # track_buffer controls how many consecutive frames the tracker keeps a lost track alive in memory before deleting it.
+        # This helps maintain the same ID during temporary occlusions.
+        results = model.track(frame, persist=True, conf=0.5, tracker="custom_tracker.yaml", verbose=False)
 
         # Draw the restricted zone
         cv2.polylines(frame, [restricted_zone_polygon], isClosed=True, color=(0, 0, 255), thickness=2)
