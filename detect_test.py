@@ -30,7 +30,7 @@ def main():
 
     print("Starting detection... Press 'q' to exit.")
 
-    zone_status = {} # Track ID -> bool (is_inside)
+    zone_status = {} # Track ID -> {'is_inside': bool, 'outside_frames': int}
     frame_count = 0
     restricted_zone_polygon = None
 
@@ -96,16 +96,23 @@ def main():
                     # Check if inside polygon
                     test_result = cv2.pointPolygonTest(restricted_zone_polygon, (x_center, y_bottom), False)
                     is_inside = test_result >= 0
-                    was_inside = zone_status.get(track_id, False)
                     
-                    if is_inside and not was_inside:
-                        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                        print(f"[EVENT] Restricted Zone Crossing - Track ID: {track_id} - Time: {timestamp}")
+                    if track_id not in zone_status:
+                        zone_status[track_id] = {'is_inside': False, 'outside_frames': 5}
                         
-                    zone_status[track_id] = is_inside
+                    status = zone_status[track_id]
                     
                     if is_inside:
+                        if not status['is_inside'] and status['outside_frames'] >= 5:
+                            timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                            print(f"[EVENT] Restricted Zone Crossing - Track ID: {track_id} - Time: {timestamp}")
+                            
+                        status['is_inside'] = True
+                        status['outside_frames'] = 0
                         color = (0, 0, 255) # Red for inside
+                    else:
+                        status['is_inside'] = False
+                        status['outside_frames'] += 1
 
                 # Print to terminal
                 if track_id is not None:
