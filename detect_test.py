@@ -3,6 +3,9 @@ import argparse
 from ultralytics import YOLO
 import numpy as np
 import datetime
+import time
+
+LOITER_THRESHOLD_SECONDS = 90
 
 def main():
     parser = argparse.ArgumentParser(description="BORDER-X YOLOv8 Object Detection Test")
@@ -62,6 +65,7 @@ def main():
         cv2.polylines(frame, [restricted_zone_polygon], isClosed=True, color=(0, 0, 255), thickness=2)
         cv2.putText(frame, "RESTRICTED ZONE", (restricted_zone_polygon[0][0], restricted_zone_polygon[0][1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
 
+        current_frame_tracks = set()
         for result in results:
             boxes = result.boxes
             if boxes is None:
@@ -83,6 +87,8 @@ def main():
 
                 # Track ID
                 track_id = int(box.id[0]) if box.id is not None else None
+                if track_id is not None:
+                    current_frame_tracks.add(track_id)
 
                 # Default bounding box color
                 color = (0, 255, 0)
@@ -104,7 +110,7 @@ def main():
                     is_inside = test_result >= 0
                     
                     if track_id not in zone_status:
-                        zone_status[track_id] = {'is_inside': False, 'outside_frames': 5}
+                        zone_status[track_id] = {'is_inside': False, 'outside_frames': 5, 'entry_time': None, 'loiter_event_fired': False}
                         
                     status = zone_status[track_id]
                     
@@ -114,12 +120,26 @@ def main():
                             if not status['is_inside'] and status['outside_frames'] >= 5:
                                 timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                                 print(f"[EVENT] Restricted Zone Crossing - Track ID: {track_id} - Time: {timestamp}")
+                                status['entry_time'] = time.time()
+                                status['loiter_event_fired'] = False
                                 
                             status['is_inside'] = True
                             status['outside_frames'] = 0
+                            
+                            if status['entry_time'] is not None:
+                                elapsed = time.time() - status['entry_time']
+                                if elapsed >= LOITER_THRESHOLD_SECONDS and not status['loiter_event_fired']:
+                                    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                                    print(f"[EVENT] LOITERING DETECTED - Track ID: {track_id} - Duration: {elapsed:.1f}s - Time: {timestamp}")
+                                    status['loiter_event_fired'] = True
+                                
+                                cv2.putText(frame, f"In Zone: {int(elapsed)}s", (x1, y2 + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
                     else:
                         status['is_inside'] = False
                         status['outside_frames'] += 1
+                        if status['outside_frames'] >= 5:
+                            status['entry_time'] = None
+                            status['loiter_event_fired'] = False
 
                 # Print to terminal
                 if track_id is not None:
@@ -133,6 +153,14 @@ def main():
                 cv2.rectangle(frame, (x1, y1), (x2, y2), color, thickness)
                 
                 cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, thickness)
+
+        for tid, status in zone_status.items():
+            if tid not in current_frame_tracks:
+                status['is_inside'] = False
+                status['outside_frames'] += 1
+                if status['outside_frames'] >= 5:
+                    status['entry_time'] = None
+                    status['loiter_event_fired'] = False
 
         # Display the frame
         cv2.imshow(window_name, frame)
