@@ -10,15 +10,15 @@
     <style>
         /* CSS reset and variables */
         :root {
-            --bg-base: #0a0a0a;
-            --bg-panel: #161616;
-            --bg-header: #1e1e1e;
-            --bg-hover: #2a2a2a;
-            --border: #333333;
-            --border-light: #444444;
-            --text-main: #f4f4f5;
-            --text-muted: #a1a1aa;
-            --text-dark: #111111;
+            --bg-base: #f0f2f5;
+            --bg-panel: #ffffff;
+            --bg-header: #f8fafc;
+            --bg-hover: #f1f5f9;
+            --border: #e2e8f0;
+            --border-light: #cbd5e1;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --text-dark: #ffffff;
             
             --risk-high: #ef4444;
             --risk-attention: #f59e0b;
@@ -90,7 +90,7 @@
             font-weight: 700;
             font-size: 16px;
             letter-spacing: 1px;
-            background-color: #121212;
+            background-color: var(--bg-panel);
         }
 
         .logo-accent {
@@ -437,7 +437,7 @@
 
         .meter-bar-bg {
             height: 8px;
-            background-color: #222;
+            background-color: var(--border-light);
             border-radius: 4px;
             overflow: hidden;
             border: 1px solid var(--border);
@@ -497,7 +497,7 @@
             flex: 1;
             height: 10px;
             margin: 0 20px;
-            background: #222;
+            background: var(--border-light);
             border-radius: 5px;
             overflow: hidden;
             border: 1px solid var(--border);
@@ -764,7 +764,7 @@
                         <span class="mono text-muted">BP-A-01</span>
                     </div>
                     <div class="panel-content">
-                        <div id="offline-status-block" style="margin-bottom: 24px; padding: 16px; background: #121212; border: 1px solid var(--border); border-radius: 4px;">
+                        <div id="offline-status-block" style="margin-bottom: 24px; padding: 16px; background: var(--bg-header); border: 1px solid var(--border); border-radius: 4px;">
                             <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
                                 <span class="text-muted font-mono" style="font-size: 12px;">NETWORK</span>
                                 <span id="sys-network" class="text-normal font-weight-bold" style="font-size: 12px;">ONLINE</span>
