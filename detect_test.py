@@ -7,14 +7,10 @@ import time
 
 LOITER_THRESHOLD_SECONDS = 90
 
-def main():
-    parser = argparse.ArgumentParser(description="BORDER-X YOLOv8 Object Detection Test")
-    parser.add_argument("video_source", nargs="?", default="0", help="Path to video file or webcam index (default: 0)")
-    args = parser.parse_args()
-
+def run_detection(video_source="0", event_callback=None):
     # Determine if video_source is a file path or a camera index
-    source = args.video_source
-    if source.isdigit():
+    source = video_source
+    if isinstance(source, str) and source.isdigit():
         source = int(source)
 
     # Load the YOLOv8 nano model
@@ -120,6 +116,17 @@ def main():
                             if not status['is_inside'] and status['outside_frames'] >= 5:
                                 timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                                 print(f"[EVENT] Restricted Zone Crossing - Track ID: {track_id} - Time: {timestamp}")
+                                
+                                if event_callback:
+                                    event_callback({
+                                        "type": "zone_crossing",
+                                        "track_id": track_id,
+                                        "timestamp": datetime.datetime.now().isoformat(),
+                                        "risk_score": 50,
+                                        "risk_level": "Elevated",
+                                        "details": "Entered restricted zone"
+                                    })
+                                    
                                 status['entry_time'] = time.time()
                                 status['loiter_event_fired'] = False
                                 
@@ -132,6 +139,16 @@ def main():
                                     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                                     print(f"[EVENT] LOITERING DETECTED - Track ID: {track_id} - Duration: {elapsed:.1f}s - Time: {timestamp}")
                                     status['loiter_event_fired'] = True
+                                    
+                                    if event_callback:
+                                        event_callback({
+                                            "type": "loitering_detected",
+                                            "track_id": track_id,
+                                            "duration": round(elapsed, 1),
+                                            "timestamp": datetime.datetime.now().isoformat(),
+                                            "risk_score": 90,
+                                            "risk_level": "High"
+                                        })
                                 
                                 cv2.putText(frame, f"In Zone: {int(elapsed)}s", (x1, y2 + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
                     else:
@@ -162,6 +179,15 @@ def main():
                     status['entry_time'] = None
                     status['loiter_event_fired'] = False
 
+        if event_callback and current_frame_tracks:
+            event_callback({
+                "type": "frame_detections",
+                "timestamp": datetime.datetime.now().isoformat(),
+                "tracked_people_count": len(current_frame_tracks),
+                "risk_score": 0,
+                "risk_level": "Normal"
+            })
+
         # Display the frame
         cv2.imshow(window_name, frame)
 
@@ -174,4 +200,7 @@ def main():
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="BORDER-X YOLOv8 Object Detection Test")
+    parser.add_argument("video_source", nargs="?", default="0", help="Path to video file or webcam index (default: 0)")
+    args = parser.parse_args()
+    run_detection(args.video_source)
