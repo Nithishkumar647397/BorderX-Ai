@@ -25,7 +25,7 @@
             --risk-normal: #22c55e;
             --risk-unknown: #71717a;
             
-            --spacing: 16px;
+            --spacing: 24px;
             --font-family: 'Inter', system-ui, -apple-system, sans-serif;
             --font-mono: 'JetBrains Mono', 'Consolas', monospace;
         }
@@ -73,7 +73,7 @@
 
         /* Sidebar */
         #sidebar {
-            width: 220px;
+            width: 240px;
             background-color: var(--bg-panel);
             border-right: 1px solid var(--border);
             display: flex;
@@ -82,10 +82,10 @@
         }
 
         .logo-container {
-            height: 50px;
+            height: 60px;
             display: flex;
             align-items: center;
-            padding: 0 16px;
+            padding: 0 20px;
             border-bottom: 1px solid var(--border);
             font-weight: 700;
             font-size: 16px;
@@ -95,18 +95,18 @@
 
         .logo-accent {
             color: var(--risk-high);
-            margin-right: 6px;
+            margin-right: 8px;
         }
 
         .nav-list {
             list-style: none;
-            padding: var(--spacing) 0;
+            padding: 16px 0;
             flex: 1;
             overflow-y: auto;
         }
 
         .nav-item {
-            padding: 8px 16px;
+            padding: 12px 20px;
             cursor: pointer;
             color: var(--text-muted);
             transition: background-color 0.15s, color 0.15s;
@@ -122,7 +122,7 @@
             background-color: var(--bg-header);
             color: var(--text-main);
             border-left: 3px solid var(--text-main);
-            padding-left: 13px;
+            padding-left: 17px;
         }
 
         /* Main Content area */
@@ -135,13 +135,13 @@
 
         /* Top Bar */
         #top-bar {
-            height: 50px;
+            height: 60px;
             background-color: var(--bg-panel);
             border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 16px;
+            padding: 0 24px;
             font-size: 14px;
         }
 
@@ -153,16 +153,16 @@
 
         .location-info {
             font-weight: 700;
-            font-size: 14px;
+            font-size: 15px;
             letter-spacing: 0.5px;
         }
 
         .status-indicator {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             font-weight: 600;
-            font-size: 11px;
+            font-size: 12px;
             letter-spacing: 0.5px;
         }
 
@@ -175,28 +175,77 @@
         .status-dot.online { background-color: var(--risk-normal); }
         .status-dot.offline { background-color: var(--risk-high); }
 
-        /* Dashboard Grid */
-        #dashboard-grid {
-            flex: 1;
-            padding: var(--spacing);
-            display: grid;
-            grid-template-columns: 1.8fr 1fr 1fr;
-            grid-template-rows: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr);
-            gap: var(--spacing);
-            overflow-y: auto;
+        /* Glance Strip */
+        #glance-strip {
+            display: flex;
+            align-items: center;
+            background-color: var(--bg-panel);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 32px;
+            gap: 64px;
+        }
+        .glance-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .glance-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+        .glance-value {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .glance-divider {
+            width: 1px;
+            height: 32px;
+            background-color: var(--border);
         }
 
+        /* Pages Container */
+        #pages-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+        }
+
+        .page-view {
+            display: none;
+            flex-direction: column;
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px;
+            gap: var(--spacing);
+        }
+
+        .page-view.active {
+            display: flex;
+        }
+        
+        .page-header-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Panels */
         .panel {
             background-color: var(--bg-panel);
             border: 1px solid var(--border);
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            border-radius: 2px;
+            border-radius: 4px;
         }
 
         .panel-header {
-            padding: 12px 16px;
+            padding: 14px 20px;
             background-color: var(--bg-header);
             border-bottom: 1px solid var(--border);
             font-weight: 700;
@@ -210,26 +259,27 @@
 
         .panel-content {
             flex: 1;
-            padding: var(--spacing);
+            padding: 20px;
             overflow: auto;
         }
-
-        /* Specific Panels Positioning */
-        #panel-cameras { grid-column: 1 / 2; grid-row: 1 / 3; }
-        #panel-alerts { grid-column: 2 / 3; grid-row: 1 / 2; }
-        #panel-summary { grid-column: 3 / 4; grid-row: 1 / 2; }
-        #panel-timeline { grid-column: 2 / 3; grid-row: 2 / 4; }
-        #panel-status { grid-column: 3 / 4; grid-row: 2 / 3; }
-        #panel-evidence { grid-column: 1 / 2; grid-row: 3 / 4; }
-        #panel-anpr { grid-column: 3 / 4; grid-row: 3 / 4; }
 
         /* Camera Grid */
         .camera-grid {
             display: grid;
+            gap: 12px;
+            height: 100%;
+        }
+        
+        .camera-grid.compact {
             grid-template-columns: repeat(2, 1fr);
             grid-template-rows: repeat(3, 1fr);
-            gap: 6px;
-            height: 100%;
+            min-height: 400px;
+        }
+        
+        .camera-grid.full {
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            min-height: 600px;
         }
 
         .camera-feed {
@@ -241,6 +291,13 @@
             flex-direction: column;
             box-shadow: inset 0 0 60px rgba(0,0,0,0.9);
             filter: grayscale(15%) contrast(105%);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        
+        .camera-feed:hover {
+            border-color: var(--text-muted);
         }
 
         /* Fake CCTV noise effect using CSS */
@@ -266,6 +323,12 @@
             color: rgba(255, 255, 255, 0.95);
             text-shadow: 1px 1px 3px rgba(0,0,0,1);
         }
+
+        .camera-top-bar, .camera-bottom-bar {
+            display: flex;
+            justify-content: space-between;
+        }
+
         .rec-dot {
             display: inline-block;
             width: 8px;
@@ -277,14 +340,9 @@
             animation: blink 2s infinite;
         }
 
-        .camera-top-bar, .camera-bottom-bar {
-            display: flex;
-            justify-content: space-between;
-        }
-
         .bounding-box {
             position: absolute;
-            border: 1px solid;
+            border: 2px solid;
             z-index: 2;
             pointer-events: none;
             display: flex;
@@ -294,11 +352,11 @@
         .bounding-box .label {
             background-color: inherit;
             color: #000;
-            font-size: 9px;
-            padding: 1px 4px;
+            font-size: 10px;
+            padding: 2px 6px;
             font-weight: 700;
-            margin-top: -15px;
-            margin-left: -1px;
+            margin-top: -18px;
+            margin-left: -2px;
             white-space: nowrap;
         }
 
@@ -307,12 +365,15 @@
             width: 100%;
             border-collapse: collapse;
             font-size: 13px;
+            table-layout: fixed;
         }
 
         th, td {
-            padding: 10px 14px;
+            padding: 12px 16px;
             text-align: left;
             border-bottom: 1px solid var(--border);
+            text-overflow: ellipsis;
+            overflow: hidden;
             white-space: nowrap;
         }
 
@@ -335,7 +396,7 @@
         }
 
         .list-item {
-            padding: 12px 16px;
+            padding: 14px 20px;
             border-bottom: 1px solid var(--border);
             display: flex;
             flex-direction: column;
@@ -355,28 +416,29 @@
         .list-item-body {
             display: flex;
             justify-content: space-between;
-            font-size: 11px;
+            font-size: 12px;
             color: var(--text-muted);
         }
 
         /* System Status Bars */
         .meter-group {
-            margin-bottom: 12px;
+            margin-bottom: 16px;
         }
         
         .meter-label {
             display: flex;
             justify-content: space-between;
-            font-size: 11px;
-            margin-bottom: 4px;
+            font-size: 12px;
+            margin-bottom: 6px;
             color: var(--text-muted);
             text-transform: uppercase;
+            font-weight: 600;
         }
 
         .meter-bar-bg {
-            height: 6px;
+            height: 8px;
             background-color: #222;
-            border-radius: 1px;
+            border-radius: 4px;
             overflow: hidden;
             border: 1px solid var(--border);
         }
@@ -394,12 +456,13 @@
             background: transparent;
             border: 1px solid var(--border-light);
             color: var(--text-main);
-            padding: 3px 10px;
-            font-size: 10px;
+            padding: 4px 12px;
+            font-size: 11px;
             font-weight: 600;
             cursor: pointer;
-            border-radius: 2px;
+            border-radius: 4px;
             text-transform: uppercase;
+            transition: all 0.2s;
         }
         .btn-view:hover { background: var(--bg-hover); border-color: var(--text-muted); }
 
@@ -407,7 +470,7 @@
         .summary-stats {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 24px;
             height: 100%;
             justify-content: center;
         }
@@ -420,11 +483,11 @@
             font-size: 12px;
             font-weight: 600;
             text-transform: uppercase;
-            width: 80px;
+            width: 90px;
             color: var(--text-muted);
         }
         .stat-value {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 700;
             font-family: var(--font-mono);
             width: 50px;
@@ -432,53 +495,22 @@
         }
         .stat-bar {
             flex: 1;
-            height: 8px;
-            margin: 0 16px;
+            height: 10px;
+            margin: 0 20px;
             background: #222;
-            border-radius: 4px;
+            border-radius: 5px;
             overflow: hidden;
             border: 1px solid var(--border);
         }
         .stat-bar-inner {
             height: 100%;
-            border-radius: 3px;
+            border-radius: 4px;
         }
 
-
-        /* Glance Strip */
-        #glance-strip {
-            display: flex;
-            align-items: center;
-            background-color: var(--bg-panel);
-            border-bottom: 1px solid var(--border);
-            padding: 16px 24px;
-            gap: 48px;
-        }
-        .glance-item {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .glance-label {
-            font-size: 11px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 600;
-        }
-        .glance-value {
-            font-size: 24px;
-            font-weight: 700;
-        }
-        .glance-divider {
-            width: 1px;
-            height: 32px;
-            background-color: var(--border);
-        }
         /* Scrollbar */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
         ::-webkit-scrollbar-track { background: var(--bg-panel); }
-        ::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 0px; }
+        ::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
         /* Toggle Button */
@@ -486,15 +518,16 @@
             background: var(--bg-panel);
             border: 1px solid var(--border-light);
             color: var(--text-main);
-            padding: 4px 12px;
-            font-size: 11px;
+            padding: 6px 16px;
+            font-size: 12px;
             font-weight: 600;
             text-transform: uppercase;
             cursor: pointer;
+            border-radius: 4px;
             transition: all 0.2s;
         }
         .toggle-btn:hover { background: var(--bg-hover); border-color: var(--text-muted); }
-        .toggle-btn.active { border-color: var(--risk-high); color: var(--risk-high); background: rgba(211, 47, 47, 0.1); }
+        .toggle-btn.active { border-color: var(--risk-high); color: var(--risk-high); background: rgba(239, 68, 68, 0.1); }
 
     </style>
 </head>
@@ -506,16 +539,16 @@
             <span class="logo-accent">|||</span> BORDER-X AI
         </div>
         <ul class="nav-list">
-            <li class="nav-item active">Overview</li>
-            <li class="nav-item">Live Cameras</li>
-            <li class="nav-item">Events</li>
-            <li class="nav-item">Evidence</li>
-            <li class="nav-item">ANPR</li>
-            <li class="nav-item">Restricted Zones</li>
-            <li class="nav-item">Devices</li>
-            <li class="nav-item">Synchronization</li>
-            <li class="nav-item">Reports</li>
-            <li class="nav-item">Settings</li>
+            <li class="nav-item active" data-target="Overview">Overview</li>
+            <li class="nav-item" data-target="Live Cameras">Live Cameras</li>
+            <li class="nav-item" data-target="Events">Events</li>
+            <li class="nav-item" data-target="Evidence">Evidence</li>
+            <li class="nav-item" data-target="ANPR">ANPR</li>
+            <li class="nav-item" data-target="Restricted Zones">Restricted Zones</li>
+            <li class="nav-item" data-target="Devices">Devices</li>
+            <li class="nav-item" data-target="Synchronization">Synchronization</li>
+            <li class="nav-item" data-target="Reports">Reports</li>
+            <li class="nav-item" data-target="Settings">Settings</li>
         </ul>
     </aside>
 
@@ -532,8 +565,8 @@
             </div>
             <div class="top-bar-right">
                 <button id="demo-offline-btn" class="toggle-btn">Simulate Offline</button>
-                <div class="mono" id="clock-display" style="font-size: 14px; font-weight: 600;">0000-00-00 00:00:00</div>
-                <div class="mono text-muted" style="font-size: 11px;">OP: J.SMITH [ID: 9402]</div>
+                <div class="mono" id="clock-display" style="font-size: 15px; font-weight: 600;">0000-00-00 00:00:00</div>
+                <div class="mono text-muted" style="font-size: 12px;">OP: J.SMITH [ID: 9402]</div>
             </div>
         </header>
 
@@ -560,172 +593,246 @@
             </div>
         </div>
 
-        <!-- Dashboard Grid -->
-        <main id="dashboard-grid">
+        <!-- Pages Container -->
+        <main id="pages-container">
             
-            <!-- 1. Live Cameras -->
-            <div id="panel-cameras" class="panel">
-                <div class="panel-header">
-                    <span>Live Camera Monitoring</span>
-                    <span class="text-muted">6/6 ONLINE</span>
-                </div>
-                <div class="panel-content" style="padding: 6px;">
-                    <div class="camera-grid" id="camera-grid">
-                        <!-- Camera feeds generated by JS -->
+            <!-- OVERVIEW PAGE -->
+            <div class="page-view active" id="page-Overview">
+                <div class="page-header-title">System Overview</div>
+                
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--spacing); flex: 1;">
+                    <!-- Left Column -->
+                    <div style="display: flex; flex-direction: column; gap: var(--spacing);">
+                        <!-- Compact Cameras -->
+                        <div class="panel" style="flex: 1;">
+                            <div class="panel-header">
+                                <span>Live Monitoring</span>
+                                <span class="text-muted">CLICK TO EXPAND</span>
+                            </div>
+                            <div class="panel-content" style="padding: 12px;" onclick="document.querySelector('.nav-item[data-target=\'Live Cameras\']').click()">
+                                <div class="camera-grid compact" id="camera-grid-overview">
+                                    <!-- Cameras JS generated -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Column -->
+                    <div style="display: flex; flex-direction: column; gap: var(--spacing);">
+                        <!-- Recent Alerts -->
+                        <div class="panel">
+                            <div class="panel-header">
+                                <span>Latest Priority Alerts</span>
+                                <span class="text-high">ACTIVE</span>
+                            </div>
+                            <div class="panel-content" style="padding: 0;" id="alerts-list">
+                                <!-- Alerts JS generated (top 3) -->
+                            </div>
+                        </div>
+
+                        <!-- Shift Risk Summary -->
+                        <div class="panel" style="flex: 1;">
+                            <div class="panel-header">
+                                <span>Shift Risk Summary</span>
+                                <span class="text-muted">LAST 12H</span>
+                            </div>
+                            <div class="panel-content">
+                                <div class="summary-stats">
+                                    <div class="stat-row">
+                                        <span class="stat-label">High Risk</span>
+                                        <div class="stat-bar"><div class="stat-bar-inner" style="width: 15%; background: var(--risk-high);"></div></div>
+                                        <span class="stat-value text-high" id="sum-high">14</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-label">Attention</span>
+                                        <div class="stat-bar"><div class="stat-bar-inner" style="width: 45%; background: var(--risk-attention);"></div></div>
+                                        <span class="stat-value text-attention" id="sum-att">42</span>
+                                    </div>
+                                    <div class="stat-row">
+                                        <span class="stat-label">Normal</span>
+                                        <div class="stat-bar"><div class="stat-bar-inner" style="width: 85%; background: var(--risk-normal);"></div></div>
+                                        <span class="stat-value text-normal" id="sum-norm">342</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 2. Priority Alerts -->
-            <div id="panel-alerts" class="panel">
-                <div class="panel-header">
-                    <span>Priority Alerts</span>
-                    <span class="text-high">ACTIVE</span>
-                </div>
-                <div class="panel-content" style="padding: 0;" id="alerts-list">
-                    <!-- Alerts generated by JS -->
-                </div>
-            </div>
-
-            <!-- 3. Risk Summary -->
-            <div id="panel-summary" class="panel">
-                <div class="panel-header">
-                    <span>Shift Risk Summary</span>
-                    <span class="text-muted">LAST 12H</span>
-                </div>
-                <div class="panel-content">
-                    <div class="summary-stats">
-                        <div class="stat-row">
-                            <span class="stat-label">High Risk</span>
-                            <div class="stat-bar"><div class="stat-bar-inner" style="width: 15%; background: var(--risk-high);"></div></div>
-                            <span class="stat-value text-high" id="sum-high">14</span>
-                        </div>
-                        <div class="stat-row">
-                            <span class="stat-label">Attention</span>
-                            <div class="stat-bar"><div class="stat-bar-inner" style="width: 45%; background: var(--risk-attention);"></div></div>
-                            <span class="stat-value text-attention" id="sum-att">42</span>
-                        </div>
-                        <div class="stat-row">
-                            <span class="stat-label">Normal</span>
-                            <div class="stat-bar"><div class="stat-bar-inner" style="width: 85%; background: var(--risk-normal);"></div></div>
-                            <span class="stat-value text-normal" id="sum-norm">342</span>
+            <!-- LIVE CAMERAS PAGE -->
+            <div class="page-view" id="page-Live Cameras">
+                <div class="page-header-title">Live Cameras</div>
+                <div class="panel" style="flex: 1;">
+                    <div class="panel-header">
+                        <span>All Camera Feeds</span>
+                        <span class="text-muted">6/6 ONLINE</span>
+                    </div>
+                    <div class="panel-content" style="padding: 16px;">
+                        <div class="camera-grid full" id="camera-grid-full">
+                            <!-- Cameras JS generated -->
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 4. Event Timeline -->
-            <div id="panel-timeline" class="panel">
-                <div class="panel-header">
-                    <span>Event Timeline</span>
-                    <span class="text-muted">LIVE</span>
-                </div>
-                <div class="panel-content" style="padding: 0;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Time</th>
-                                <th>Cam</th>
-                                <th>Type</th>
-                                <th class="text-right">Score</th>
-                                <th class="text-right">Sync</th>
-                            </tr>
-                        </thead>
-                        <tbody id="timeline-body">
-                            <!-- Timeline rows generated by JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- 5 & 6. System Status & Offline Status -->
-            <div id="panel-status" class="panel">
-                <div class="panel-header">
-                    <span>Edge Node Status</span>
-                    <span class="mono text-muted">BP-A-01</span>
-                </div>
-                <div class="panel-content">
-                    <div id="offline-status-block" style="margin-bottom: 20px; padding: 10px; background: #121212; border: 1px solid var(--border);">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                            <span class="text-muted font-mono" style="font-size: 11px;">NETWORK</span>
-                            <span id="sys-network" class="text-normal font-weight-bold" style="font-size: 11px;">ONLINE</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                            <span class="text-muted font-mono" style="font-size: 11px;">EDGE AI ENGINE</span>
-                            <span class="text-normal" style="font-size: 11px;">RUNNING</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                            <span class="text-muted font-mono" style="font-size: 11px;">SYNC QUEUE</span>
-                            <span id="sys-sync" class="mono text-muted" style="font-size: 11px;">0</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between;">
-                            <span class="text-muted font-mono" style="font-size: 11px;">LOCAL STORAGE</span>
-                            <span class="text-normal" style="font-size: 11px;">ACTIVE</span>
-                        </div>
+            <!-- EVENTS PAGE -->
+            <div class="page-view" id="page-Events">
+                <div class="page-header-title">Event Timeline</div>
+                <div class="panel" style="flex: 1;">
+                    <div class="panel-header">
+                        <span>All Events History</span>
+                        <span class="text-muted">LIVE SYNC</span>
                     </div>
-
-                    <div class="meter-group">
-                        <div class="meter-label"><span>CPU (NPU Active)</span><span id="meter-cpu-val" class="mono">42%</span></div>
-                        <div class="meter-bar-bg"><div id="meter-cpu" class="meter-bar-fill" style="width: 42%;"></div></div>
-                    </div>
-                    <div class="meter-group">
-                        <div class="meter-label"><span>GPU (Inference)</span><span id="meter-gpu-val" class="mono">78%</span></div>
-                        <div class="meter-bar-bg"><div id="meter-gpu" class="meter-bar-fill warn" style="width: 78%;"></div></div>
-                    </div>
-                    <div class="meter-group">
-                        <div class="meter-label"><span>RAM</span><span id="meter-ram-val" class="mono">12.0GB / 16GB</span></div>
-                        <div class="meter-bar-bg"><div id="meter-ram" class="meter-bar-fill warn" style="width: 75%;"></div></div>
-                    </div>
-                    <div class="meter-group" style="margin-bottom: 0;">
-                        <div class="meter-label"><span>Storage (SDA1)</span><span id="meter-sto-val" class="mono">1.2TB / 4TB</span></div>
-                        <div class="meter-bar-bg"><div id="meter-sto" class="meter-bar-fill" style="width: 30%;"></div></div>
+                    <div class="panel-content" style="padding: 0;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 15%;">Time</th>
+                                    <th style="width: 15%;">Cam</th>
+                                    <th style="width: 40%;">Type</th>
+                                    <th class="text-right" style="width: 15%;">Score</th>
+                                    <th class="text-right" style="width: 15%;">Sync</th>
+                                </tr>
+                            </thead>
+                            <tbody id="timeline-body">
+                                <!-- Timeline rows -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
 
-            <!-- 7. Evidence Section -->
-            <div id="panel-evidence" class="panel">
-                <div class="panel-header">
-                    <span>Recent Evidence Packages</span>
-                    <span class="text-muted">STORED LOCALLY</span>
-                </div>
-                <div class="panel-content" style="padding: 0;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>EV-ID</th>
-                                <th>Time</th>
-                                <th>Camera</th>
-                                <th>Risk</th>
-                                <th class="text-right">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="evidence-body">
-                            <!-- Evidence rows generated by JS -->
-                        </tbody>
-                    </table>
+            <!-- EVIDENCE PAGE -->
+            <div class="page-view" id="page-Evidence">
+                <div class="page-header-title">Evidence Packages</div>
+                <div class="panel" style="flex: 1;">
+                    <div class="panel-header">
+                        <span>Stored Evidence</span>
+                        <span class="text-muted">LOCAL VAULT</span>
+                    </div>
+                    <div class="panel-content" style="padding: 0;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 25%;">EV-ID</th>
+                                    <th style="width: 20%;">Time</th>
+                                    <th style="width: 20%;">Camera</th>
+                                    <th style="width: 20%;">Risk</th>
+                                    <th class="text-right" style="width: 15%;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="evidence-body">
+                                <!-- Evidence rows -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
-            <!-- 8. ANPR Panel -->
-            <div id="panel-anpr" class="panel">
-                <div class="panel-header">
-                    <span>ANPR Log</span>
-                    <span class="text-muted">GATES C02/C03</span>
+            <!-- ANPR PAGE -->
+            <div class="page-view" id="page-ANPR">
+                <div class="page-header-title">ANPR Log</div>
+                <div class="panel" style="flex: 1; max-width: 800px;">
+                    <div class="panel-header">
+                        <span>Vehicle Plate Recognition</span>
+                        <span class="text-muted">GATES C02/C03</span>
+                    </div>
+                    <div class="panel-content" style="padding: 0;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 40%;">Plate</th>
+                                    <th style="width: 30%;">Status</th>
+                                    <th class="text-right" style="width: 30%;">Cam</th>
+                                </tr>
+                            </thead>
+                            <tbody id="anpr-body">
+                                <!-- ANPR rows -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <div class="panel-content" style="padding: 0;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Plate</th>
-                                <th>Status</th>
-                                <th class="text-right">Cam</th>
-                            </tr>
-                        </thead>
-                        <tbody id="anpr-body">
-                            <!-- ANPR rows generated by JS -->
-                        </tbody>
-                    </table>
+            </div>
+
+            <!-- DEVICES PAGE -->
+            <div class="page-view" id="page-Devices">
+                <div class="page-header-title">Devices & Edge Nodes</div>
+                <div class="panel" style="width: 100%; max-width: 600px;">
+                    <div class="panel-header">
+                        <span>Edge Node Status</span>
+                        <span class="mono text-muted">BP-A-01</span>
+                    </div>
+                    <div class="panel-content">
+                        <div id="offline-status-block" style="margin-bottom: 24px; padding: 16px; background: #121212; border: 1px solid var(--border); border-radius: 4px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                                <span class="text-muted font-mono" style="font-size: 12px;">NETWORK</span>
+                                <span id="sys-network" class="text-normal font-weight-bold" style="font-size: 12px;">ONLINE</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                                <span class="text-muted font-mono" style="font-size: 12px;">EDGE AI ENGINE</span>
+                                <span class="text-normal" style="font-size: 12px;">RUNNING</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                                <span class="text-muted font-mono" style="font-size: 12px;">SYNC QUEUE</span>
+                                <span id="sys-sync" class="mono text-muted" style="font-size: 12px;">0</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span class="text-muted font-mono" style="font-size: 12px;">LOCAL STORAGE</span>
+                                <span class="text-normal" style="font-size: 12px;">ACTIVE</span>
+                            </div>
+                        </div>
+
+                        <div class="meter-group">
+                            <div class="meter-label"><span>CPU (NPU Active)</span><span id="meter-cpu-val" class="mono">42%</span></div>
+                            <div class="meter-bar-bg"><div id="meter-cpu" class="meter-bar-fill" style="width: 42%;"></div></div>
+                        </div>
+                        <div class="meter-group">
+                            <div class="meter-label"><span>GPU (Inference)</span><span id="meter-gpu-val" class="mono">78%</span></div>
+                            <div class="meter-bar-bg"><div id="meter-gpu" class="meter-bar-fill warn" style="width: 78%;"></div></div>
+                        </div>
+                        <div class="meter-group">
+                            <div class="meter-label"><span>RAM</span><span id="meter-ram-val" class="mono">12.0GB / 16GB</span></div>
+                            <div class="meter-bar-bg"><div id="meter-ram" class="meter-bar-fill warn" style="width: 75%;"></div></div>
+                        </div>
+                        <div class="meter-group" style="margin-bottom: 0;">
+                            <div class="meter-label"><span>Storage (SDA1)</span><span id="meter-sto-val" class="mono">1.2TB / 4TB</span></div>
+                            <div class="meter-bar-bg"><div id="meter-sto" class="meter-bar-fill" style="width: 30%;"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PLACEHOLDERS -->
+            <div class="page-view" id="page-Restricted Zones">
+                <div class="page-header-title">Restricted Zones</div>
+                <div class="panel" style="padding: 48px; text-align: center; color: var(--text-muted);">
+                    <h3>Coming Soon</h3>
+                    <p style="margin-top: 8px;">Map and zone configuration module is currently under development.</p>
+                </div>
+            </div>
+            
+            <div class="page-view" id="page-Synchronization">
+                <div class="page-header-title">Synchronization</div>
+                <div class="panel" style="padding: 48px; text-align: center; color: var(--text-muted);">
+                    <h3>Coming Soon</h3>
+                    <p style="margin-top: 8px;">Upstream VMS sync configuration.</p>
+                </div>
+            </div>
+
+            <div class="page-view" id="page-Reports">
+                <div class="page-header-title">Reports</div>
+                <div class="panel" style="padding: 48px; text-align: center; color: var(--text-muted);">
+                    <h3>Coming Soon</h3>
+                    <p style="margin-top: 8px;">Shift and compliance reporting.</p>
+                </div>
+            </div>
+
+            <div class="page-view" id="page-Settings">
+                <div class="page-header-title">Settings</div>
+                <div class="panel" style="padding: 48px; text-align: center; color: var(--text-muted);">
+                    <h3>Coming Soon</h3>
+                    <p style="margin-top: 8px;">System and operator configuration.</p>
                 </div>
             </div>
 
@@ -734,13 +841,7 @@
 
     <!-- Data Simulation & UI Logic -->
     <script>
-        /**
-         * BORDER-X AI 
-         * Data Simulation Module
-         * 
-         * Generates realistic surveillance event data independent of the UI layer.
-         * Designed to be easily replaced by a WebSocket handler later.
-         */
+        
         const DataSim = (function() {
             let state = {
                 networkOnline: true,
@@ -780,22 +881,21 @@
 
             function generateTimestamp() {
                 const now = new Date();
-                return now.toISOString().split('T')[1].split('.')[0]; // HH:MM:SS
+                return now.toISOString().split('T')[1].split('.')[0];
             }
 
             function triggerEvent() {
                 const cam = state.cameras[Math.floor(Math.random() * state.cameras.length)];
                 
-                // Weight random to favor normal events
                 const rand = Math.random();
                 let eventDef;
-                if (rand > 0.95) eventDef = EVENT_TYPES[0]; // Breach
-                else if (rand > 0.90) eventDef = EVENT_TYPES[1]; // Zone
-                else if (rand > 0.80) eventDef = EVENT_TYPES[2]; // Loitering
-                else if (rand > 0.70) eventDef = EVENT_TYPES[3]; // Unidentified Vehicle
-                else if (rand > 0.40) eventDef = EVENT_TYPES[4]; // Person
-                else if (rand > 0.20) eventDef = EVENT_TYPES[5]; // Vehicle
-                else eventDef = EVENT_TYPES[6]; // Wildlife
+                if (rand > 0.95) eventDef = EVENT_TYPES[0];
+                else if (rand > 0.90) eventDef = EVENT_TYPES[1];
+                else if (rand > 0.80) eventDef = EVENT_TYPES[2];
+                else if (rand > 0.70) eventDef = EVENT_TYPES[3];
+                else if (rand > 0.40) eventDef = EVENT_TYPES[4];
+                else if (rand > 0.20) eventDef = EVENT_TYPES[5];
+                else eventDef = EVENT_TYPES[6];
 
                 const risk_score = Math.min(99, eventDef.base_score + Math.floor(Math.random() * 15));
                 
@@ -818,12 +918,10 @@
                     state.syncQueue.push(event.id);
                 }
 
-                // Update stats
                 if (event.risk_level === 'HIGH') state.stats.high++;
                 else if (event.risk_level === 'ATTENTION') state.stats.attention++;
                 else state.stats.normal++;
 
-                // Evidence generation for High/Attention
                 if (event.risk_level === 'HIGH' || (event.risk_level === 'ATTENTION' && Math.random() > 0.5)) {
                     state.evidence.unshift({
                         id: 'EVD-' + (++evidenceCounter),
@@ -835,7 +933,6 @@
                     if (state.evidence.length > 20) state.evidence.pop();
                 }
 
-                // ANPR generation if vehicle
                 if (event.event_type.includes('Vehicle') && (cam.id === 'C02' || cam.id === 'C03')) {
                     const plate = PLATES[Math.floor(Math.random() * PLATES.length)];
                     const status = plate.includes('UNK') ? 'UNKNOWN' : (Math.random() > 0.2 ? 'AUTHORIZED' : 'FLAGGED');
@@ -849,7 +946,6 @@
                     if (state.anpr.length > 20) state.anpr.pop();
                 }
 
-                // Temporary Camera Detection Bounding Box
                 cam.detections = [{
                     label: event.event_type === 'Person Detected' ? 'PERSON' : (event.event_type.includes('Vehicle') ? 'VEHICLE' : 'OBJ'),
                     x: Math.random() * 60 + 10,
@@ -859,7 +955,6 @@
                     color: event.risk_level === 'HIGH' ? 'var(--risk-high)' : (event.risk_level === 'ATTENTION' ? 'var(--risk-attention)' : 'var(--risk-normal)')
                 }];
 
-                // Clear detection after a brief moment
                 setTimeout(() => {
                     cam.detections = [];
                     if (window.UIHandler) window.UIHandler.onDataUpdate();
@@ -871,7 +966,6 @@
             function toggleNetwork() {
                 state.networkOnline = !state.networkOnline;
                 if (state.networkOnline) {
-                    // Flush sync queue
                     state.events.forEach(e => {
                         if (e.sync_status === 'PENDING') e.sync_status = 'SYNCED';
                     });
@@ -881,17 +975,14 @@
                 return state.networkOnline;
             }
 
-            // Start simulation loop
             setInterval(() => {
-                if (Math.random() > 0.4) triggerEvent(); // 60% chance every tick
+                if (Math.random() > 0.4) triggerEvent();
             }, 3000);
 
-            // Hardware stats fluctuation
             setInterval(() => {
                 if (window.UIHandler) window.UIHandler.updateHardwareStats();
             }, 2000);
 
-            // Generate initial state
             for(let i=0; i<15; i++) triggerEvent();
 
             return {
@@ -899,16 +990,33 @@
                 toggleNetwork: toggleNetwork
             };
         })();
-
-        /**
-         * UI Rendering Module
-         * Separated from data generation.
-         */
+        
         window.UIHandler = (function() {
+            // Sidebar Navigation Logic
+            const navItems = document.querySelectorAll('.nav-item');
+            const pageViews = document.querySelectorAll('.page-view');
+
+            navItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    item.classList.add('active');
+                    
+                    const targetPageId = 'page-' + item.getAttribute('data-target');
+                    pageViews.forEach(page => {
+                        if(page.id === targetPageId) {
+                            page.classList.add('active');
+                        } else {
+                            page.classList.remove('active');
+                        }
+                    });
+                });
+            });
+
             // DOM Elements Cache
             const els = {
                 clock: document.getElementById('clock-display'),
-                cameras: document.getElementById('camera-grid'),
+                camerasOverview: document.getElementById('camera-grid-overview'),
+                camerasFull: document.getElementById('camera-grid-full'),
                 alerts: document.getElementById('alerts-list'),
                 timeline: document.getElementById('timeline-body'),
                 evidence: document.getElementById('evidence-body'),
@@ -926,7 +1034,9 @@
                 meterGpu: document.getElementById('meter-gpu'),
                 meterGpuVal: document.getElementById('meter-gpu-val'),
                 meterRam: document.getElementById('meter-ram'),
-                meterRamVal: document.getElementById('meter-ram-val')
+                meterRamVal: document.getElementById('meter-ram-val'),
+                meterSto: document.getElementById('meter-sto'),
+                meterStoVal: document.getElementById('meter-sto-val')
             };
 
             function updateClock() {
@@ -936,7 +1046,6 @@
             setInterval(updateClock, 1000);
             updateClock();
 
-            // Setup offline toggle
             els.btnOffline.addEventListener('click', () => {
                 const isOnline = DataSim.toggleNetwork();
                 if (isOnline) {
@@ -962,8 +1071,15 @@
                 return 'text-normal';
             }
 
-            function renderCameras(cameras) {
+            function generateCameraHTML(cameras) {
                 let html = '';
+                if (!document.getElementById('blink-anim')) {
+                    const style = document.createElement('style');
+                    style.id = 'blink-anim';
+                    style.innerHTML = `@keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }`;
+                    document.head.appendChild(style);
+                }
+
                 cameras.forEach(cam => {
                     let detHtml = '';
                     cam.detections.forEach(d => {
@@ -973,7 +1089,6 @@
                         </div>`;
                     });
 
-                    // Fluctuate FPS slightly for realism
                     const curFps = cam.fps - Math.floor(Math.random() * 2);
 
                     html += `
@@ -985,27 +1100,25 @@
                                 <span class="text-high" style="font-size: 11px; display: flex; align-items: center; font-weight: 600;"><span class="rec-dot"></span>REC</span>
                             </div>
                             <div class="camera-bottom-bar">
-                                <span>${els.clock.textContent.split(' ')[1]}</span>
+                                <span>${els.clock.textContent.split(' ')[1] || '00:00:00'}</span>
                                 <span>${curFps} FPS | DET: ${cam.detections.length}</span>
                             </div>
                         </div>
                         ${detHtml}
                     </div>`;
                 });
-                
-                // Add blink animation dynamically if not present
-                if (!document.getElementById('blink-anim')) {
-                    const style = document.createElement('style');
-                    style.id = 'blink-anim';
-                    style.innerHTML = `@keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }`;
-                    document.head.appendChild(style);
-                }
-                
-                els.cameras.innerHTML = html;
+                return html;
+            }
+
+            function renderCameras(cameras) {
+                const camHtml = generateCameraHTML(cameras);
+                els.camerasOverview.innerHTML = camHtml;
+                els.camerasFull.innerHTML = camHtml;
             }
 
             function renderAlerts(events) {
-                const alerts = events.filter(e => e.risk_level !== 'NORMAL').slice(0, 5);
+                // Top 3 for Overview
+                const alerts = events.filter(e => e.risk_level !== 'NORMAL').slice(0, 3);
                 let html = '';
                 alerts.forEach(a => {
                     html += `
@@ -1014,7 +1127,7 @@
                             <span class="badge ${getBadgeClass(a.risk_level)}">${a.risk_level}</span>
                             <span class="mono text-muted" style="font-size: 11px;">${a.timestamp}</span>
                         </div>
-                        <div style="font-weight: 600; font-size: 12px; margin-top: 2px;">${a.event_type}</div>
+                        <div style="font-weight: 600; font-size: 13px; margin-top: 4px;">${a.event_type}</div>
                         <div class="list-item-body">
                             <span class="mono">CAM: ${a.camera_id}</span>
                             <span>SCORE: <span class="${getTextColor(a.risk_level)} fw-bold">${a.risk_score}</span></span>
@@ -1026,7 +1139,7 @@
 
             function renderTimeline(events) {
                 let html = '';
-                events.slice(0, 15).forEach(e => {
+                events.forEach(e => {
                     const syncColor = e.sync_status === 'SYNCED' ? 'text-normal' : 'text-attention';
                     html += `
                     <tr>
@@ -1042,10 +1155,10 @@
 
             function renderEvidence(evidence) {
                 let html = '';
-                evidence.slice(0, 10).forEach(e => {
+                evidence.forEach(e => {
                     html += `
                     <tr>
-                        <td class="mono text-muted">${e.id}</td>
+                        <td class="mono text-muted" title="${e.id}">${e.id}</td>
                         <td class="mono text-muted">${e.timestamp}</td>
                         <td class="mono">${e.camera_id}</td>
                         <td><span class="badge ${getBadgeClass(e.risk_level)}">${e.risk_level}</span></td>
@@ -1057,7 +1170,7 @@
 
             function renderANPR(anpr) {
                 let html = '';
-                anpr.slice(0, 10).forEach(a => {
+                anpr.forEach(a => {
                     html += `
                     <tr>
                         <td class="mono font-weight-bold">${a.plate}</td>
@@ -1115,20 +1228,25 @@
                 const gpu = 70 + Math.floor(Math.random() * 20);
                 const ram = 11.5 + (Math.random() * 1.5);
                 
-                els.meterCpuVal.textContent = cpu + '%';
-                els.meterCpu.style.width = cpu + '%';
+                if(els.meterCpuVal) {
+                    els.meterCpuVal.textContent = cpu + '%';
+                    els.meterCpu.style.width = cpu + '%';
+                }
                 
-                els.meterGpuVal.textContent = gpu + '%';
-                els.meterGpu.style.width = gpu + '%';
-                if (gpu > 85) els.meterGpu.className = 'meter-bar-fill crit';
-                else els.meterGpu.className = 'meter-bar-fill warn';
+                if(els.meterGpuVal) {
+                    els.meterGpuVal.textContent = gpu + '%';
+                    els.meterGpu.style.width = gpu + '%';
+                    if (gpu > 85) els.meterGpu.className = 'meter-bar-fill crit';
+                    else els.meterGpu.className = 'meter-bar-fill warn';
+                }
 
-                els.meterRamVal.textContent = ram.toFixed(1) + 'GB / 16GB';
-                const ramPct = (ram / 16) * 100;
-                els.meterRam.style.width = ramPct + '%';
+                if(els.meterRamVal) {
+                    els.meterRamVal.textContent = ram.toFixed(1) + 'GB / 16GB';
+                    const ramPct = (ram / 16) * 100;
+                    els.meterRam.style.width = ramPct + '%';
+                }
             }
 
-            // Public method exposed for DataSim to call when state changes
             function onDataUpdate() {
                 const state = DataSim.getState();
                 renderCameras(state.cameras);
