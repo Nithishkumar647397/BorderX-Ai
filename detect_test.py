@@ -31,6 +31,7 @@ def main():
     print("Starting detection... Press 'q' to exit.")
 
     zone_status = {} # Track ID -> {'is_inside': bool, 'outside_frames': int}
+    track_frames = {} # Track ID -> frames seen
     frame_count = 0
     restricted_zone_polygon = None
 
@@ -55,7 +56,7 @@ def main():
         # Run YOLO tracking
         # track_buffer controls how many consecutive frames the tracker keeps a lost track alive in memory before deleting it.
         # This helps maintain the same ID during temporary occlusions.
-        results = model.track(frame, persist=True, conf=0.5, tracker="custom_tracker.yaml", verbose=False)
+        results = model.track(frame, persist=True, conf=0.6, tracker="custom_tracker.yaml", verbose=False)
 
         # Draw the restricted zone
         cv2.polylines(frame, [restricted_zone_polygon], isClosed=True, color=(0, 0, 255), thickness=2)
@@ -89,6 +90,11 @@ def main():
 
                 # Restricted zone logic
                 if cls_name == "person" and track_id is not None:
+                    # Update track frame counter
+                    if track_id not in track_frames:
+                        track_frames[track_id] = 0
+                    track_frames[track_id] += 1
+
                     # Calculate reference point (bottom-center)
                     x_center = (x1 + x2) // 2
                     y_bottom = y2
@@ -103,13 +109,14 @@ def main():
                     status = zone_status[track_id]
                     
                     if is_inside:
-                        if not status['is_inside'] and status['outside_frames'] >= 5:
-                            timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                            print(f"[EVENT] Restricted Zone Crossing - Track ID: {track_id} - Time: {timestamp}")
-                            
-                        status['is_inside'] = True
-                        status['outside_frames'] = 0
                         color = (0, 0, 255) # Red for inside
+                        if track_frames[track_id] >= 10:
+                            if not status['is_inside'] and status['outside_frames'] >= 5:
+                                timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                                print(f"[EVENT] Restricted Zone Crossing - Track ID: {track_id} - Time: {timestamp}")
+                                
+                            status['is_inside'] = True
+                            status['outside_frames'] = 0
                     else:
                         status['is_inside'] = False
                         status['outside_frames'] += 1
