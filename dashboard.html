@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BORDER-X AI | Surveillance Command Dashboard</title>
+    <style>
+        /* CSS reset and variables */
+        :root {
+            --bg-base: #0a0a0a;
+            --bg-panel: #161616;
+            --bg-header: #1e1e1e;
+            --bg-hover: #2a2a2a;
+            --border: #333333;
+            --border-light: #444444;
+            --text-main: #e0e0e0;
+            --text-muted: #888888;
+            --text-dark: #111111;
+            
+            --risk-high: #d32f2f;
+            --risk-attention: #f57c00;
+            --risk-normal: #388e3c;
+            --risk-unknown: #757575;
+            
+            --spacing: 8px;
+            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --font-mono: 'Consolas', 'Courier New', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: var(--font-family);
+            font-size: 13px;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Utility Classes */
+        .text-high { color: var(--risk-high); }
+        .text-attention { color: var(--risk-attention); }
+        .text-normal { color: var(--risk-normal); }
+        .text-muted { color: var(--text-muted); }
+        .font-weight-bold { font-weight: 700; }
+        .fw-bold { font-weight: 700; }
+        
+        .badge {
+            padding: 2px 6px;
+            border-radius: 2px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .badge-high { background: var(--risk-high); color: var(--text-dark); }
+        .badge-attention { background: var(--risk-attention); color: var(--text-dark); }
+        .badge-normal { background: var(--risk-normal); color: var(--text-dark); }
+        
+        .mono { font-family: var(--font-mono); }
+
+        /* Sidebar */
+        #sidebar {
+            width: 220px;
+            background-color: var(--bg-panel);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .logo-container {
+            height: 50px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 700;
+            font-size: 16px;
+            letter-spacing: 1px;
+            background-color: #121212;
+        }
+
+        .logo-accent {
+            color: var(--risk-high);
+            margin-right: 6px;
+        }
+
+        .nav-list {
+            list-style: none;
+            padding: var(--spacing) 0;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            padding: 8px 16px;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: background-color 0.15s, color 0.15s;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            background-color: var(--bg-hover);
+            color: var(--text-main);
+        }
+
+        .nav-item.active {
+            background-color: var(--bg-header);
+            color: var(--text-main);
+            border-left: 3px solid var(--text-main);
+            padding-left: 13px;
+        }
+
+        /* Main Content area */
+        #main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Top Bar */
+        #top-bar {
+            height: 50px;
+            background-color: var(--bg-panel);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            font-size: 13px;
+        }
+
+        .top-bar-left, .top-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .location-info {
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-dot.online { background-color: var(--risk-normal); }
+        .status-dot.offline { background-color: var(--risk-high); }
+
+        /* Dashboard Grid */
+        #dashboard-grid {
+            flex: 1;
+            padding: var(--spacing);
+            display: grid;
+            grid-template-columns: 1.8fr 1fr 1fr;
+            grid-template-rows: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr);
+            gap: var(--spacing);
+            overflow-y: auto;
+        }
+
+        .panel {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border-radius: 2px;
+        }
+
+        .panel-header {
+            padding: 6px 12px;
+            background-color: var(--bg-header);
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-content {
+            flex: 1;
+            padding: var(--spacing);
+            overflow: auto;
+        }
+
+        /* Specific Panels Positioning */
+        #panel-cameras { grid-column: 1 / 2; grid-row: 1 / 3; }
+        #panel-alerts { grid-column: 2 / 3; grid-row: 1 / 2; }
+        #panel-summary { grid-column: 3 / 4; grid-row: 1 / 2; }
+        #panel-timeline { grid-column: 2 / 3; grid-row: 2 / 4; }
+        #panel-status { grid-column: 3 / 4; grid-row: 2 / 3; }
+        #panel-evidence { grid-column: 1 / 2; grid-row: 3 / 4; }
+        #panel-anpr { grid-column: 3 / 4; grid-row: 3 / 4; }
+
+        /* Camera Grid */
+        .camera-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 6px;
+            height: 100%;
+        }
+
+        .camera-feed {
+            position: relative;
+            background-color: #050505;
+            border: 1px solid var(--border-light);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Fake CCTV noise effect using CSS */
+        .camera-noise {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)" opacity="0.08"/%3E%3C/svg%3E');
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .camera-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 2;
+            pointer-events: none;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.85);
+            text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+        }
+
+        .camera-top-bar, .camera-bottom-bar {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .bounding-box {
+            position: absolute;
+            border: 1px solid;
+            z-index: 2;
+            pointer-events: none;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .bounding-box .label {
+            background-color: inherit;
+            color: #000;
+            font-size: 9px;
+            padding: 1px 4px;
+            font-weight: 700;
+            margin-top: -15px;
+            margin-left: -1px;
+            white-space: nowrap;
+        }
+
+        /* Tables and Lists */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        th, td {
+            padding: 6px 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        th {
+            color: var(--text-muted);
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            background-color: var(--bg-panel);
+            z-index: 5;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tbody tr:hover {
+            background-color: var(--bg-hover);
+        }
+
+        .list-item {
+            padding: 10px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .list-item:hover {
+            background-color: var(--bg-hover);
+        }
+
+        .list-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .list-item-body {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* System Status Bars */
+        .meter-group {
+            margin-bottom: 12px;
+        }
+        
+        .meter-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            margin-bottom: 4px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .meter-bar-bg {
+            height: 6px;
+            background-color: #222;
+            border-radius: 1px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .meter-bar-fill {
+            height: 100%;
+            background-color: var(--risk-normal);
+            transition: width 0.5s ease;
+        }
+
+        .meter-bar-fill.warn { background-color: var(--risk-attention); }
+        .meter-bar-fill.crit { background-color: var(--risk-high); }
+
+        .btn-view {
+            background: transparent;
+            border: 1px solid var(--border-light);
+            color: var(--text-main);
+            padding: 3px 10px;
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 2px;
+            text-transform: uppercase;
+        }
+        .btn-view:hover { background: var(--bg-hover); border-color: var(--text-muted); }
+
+        /* Summary Charts */
+        .summary-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            height: 100%;
+            justify-content: center;
+        }
+        .stat-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .stat-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            width: 80px;
+            color: var(--text-muted);
+        }
+        .stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            font-family: var(--font-mono);
+            width: 40px;
+            text-align: right;
+        }
+        .stat-bar {
+            flex: 1;
+            height: 4px;
+            margin: 0 16px;
+            background: var(--border);
+        }
+        .stat-bar-inner {
+            height: 100%;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-panel); }
+        ::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 0px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+        /* Toggle Button */
+        .toggle-btn {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-light);
+            color: var(--text-main);
+            padding: 4px 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .toggle-btn:hover { background: var(--bg-hover); border-color: var(--text-muted); }
+        .toggle-btn.active { border-color: var(--risk-high); color: var(--risk-high); background: rgba(211, 47, 47, 0.1); }
+
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <aside id="sidebar">
+        <div class="logo-container">
+            <span class="logo-accent">|||</span> BORDER-X AI
+        </div>
+        <ul class="nav-list">
+            <li class="nav-item active">Overview</li>
+            <li class="nav-item">Live Cameras</li>
+            <li class="nav-item">Events</li>
+            <li class="nav-item">Evidence</li>
+            <li class="nav-item">ANPR</li>
+            <li class="nav-item">Restricted Zones</li>
+            <li class="nav-item">Devices</li>
+            <li class="nav-item">Synchronization</li>
+            <li class="nav-item">Reports</li>
+            <li class="nav-item">Settings</li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <div id="main-content">
+        <!-- Top Bar -->
+        <header id="top-bar">
+            <div class="top-bar-left">
+                <div class="location-info">Border Post Alpha</div>
+                <div class="status-indicator">
+                    <div id="top-network-dot" class="status-dot online"></div>
+                    <span id="top-network-text" class="text-normal">NETWORK ONLINE</span>
+                </div>
+            </div>
+            <div class="top-bar-right">
+                <button id="demo-offline-btn" class="toggle-btn">Simulate Offline</button>
+                <div class="mono" id="clock-display" style="font-size: 14px; font-weight: 600;">0000-00-00 00:00:00</div>
+                <div class="mono text-muted" style="font-size: 11px;">OP: J.SMITH [ID: 9402]</div>
+            </div>
+        </header>
+
+        <!-- Dashboard Grid -->
+        <main id="dashboard-grid">
+            
+            <!-- 1. Live Cameras -->
+            <div id="panel-cameras" class="panel">
+                <div class="panel-header">
+                    <span>Live Camera Monitoring</span>
+                    <span class="text-muted">6/6 ONLINE</span>
+                </div>
+                <div class="panel-content" style="padding: 6px;">
+                    <div class="camera-grid" id="camera-grid">
+                        <!-- Camera feeds generated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Priority Alerts -->
+            <div id="panel-alerts" class="panel">
+                <div class="panel-header">
+                    <span>Priority Alerts</span>
+                    <span class="text-high">ACTIVE</span>
+                </div>
+                <div class="panel-content" style="padding: 0;" id="alerts-list">
+                    <!-- Alerts generated by JS -->
+                </div>
+            </div>
+
+            <!-- 3. Risk Summary -->
+            <div id="panel-summary" class="panel">
+                <div class="panel-header">
+                    <span>Shift Risk Summary</span>
+                    <span class="text-muted">LAST 12H</span>
+                </div>
+                <div class="panel-content">
+                    <div class="summary-stats">
+                        <div class="stat-row">
+                            <span class="stat-label">High Risk</span>
+                            <div class="stat-bar"><div class="stat-bar-inner" style="width: 15%; background: var(--risk-high);"></div></div>
+                            <span class="stat-value text-high" id="sum-high">14</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Attention</span>
+                            <div class="stat-bar"><div class="stat-bar-inner" style="width: 45%; background: var(--risk-attention);"></div></div>
+                            <span class="stat-value text-attention" id="sum-att">42</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Normal</span>
+                            <div class="stat-bar"><div class="stat-bar-inner" style="width: 85%; background: var(--risk-normal);"></div></div>
+                            <span class="stat-value text-normal" id="sum-norm">342</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Event Timeline -->
+            <div id="panel-timeline" class="panel">
+                <div class="panel-header">
+                    <span>Event Timeline</span>
+                    <span class="text-muted">LIVE</span>
+                </div>
+                <div class="panel-content" style="padding: 0;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Cam</th>
+                                <th>Type</th>
+                                <th>Score</th>
+                                <th>Sync</th>
+                            </tr>
+                        </thead>
+                        <tbody id="timeline-body">
+                            <!-- Timeline rows generated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 5 & 6. System Status & Offline Status -->
+            <div id="panel-status" class="panel">
+                <div class="panel-header">
+                    <span>Edge Node Status</span>
+                    <span class="mono text-muted">BP-A-01</span>
+                </div>
+                <div class="panel-content">
+                    <div id="offline-status-block" style="margin-bottom: 20px; padding: 10px; background: #121212; border: 1px solid var(--border);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                            <span class="text-muted font-mono" style="font-size: 11px;">NETWORK</span>
+                            <span id="sys-network" class="text-normal font-weight-bold" style="font-size: 11px;">ONLINE</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                            <span class="text-muted font-mono" style="font-size: 11px;">EDGE AI ENGINE</span>
+                            <span class="text-normal" style="font-size: 11px;">RUNNING</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                            <span class="text-muted font-mono" style="font-size: 11px;">SYNC QUEUE</span>
+                            <span id="sys-sync" class="mono text-muted" style="font-size: 11px;">0</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span class="text-muted font-mono" style="font-size: 11px;">LOCAL STORAGE</span>
+                            <span class="text-normal" style="font-size: 11px;">ACTIVE</span>
+                        </div>
+                    </div>
+
+                    <div class="meter-group">
+                        <div class="meter-label"><span>CPU (NPU Active)</span><span id="meter-cpu-val" class="mono">42%</span></div>
+                        <div class="meter-bar-bg"><div id="meter-cpu" class="meter-bar-fill" style="width: 42%;"></div></div>
+                    </div>
+                    <div class="meter-group">
+                        <div class="meter-label"><span>GPU (Inference)</span><span id="meter-gpu-val" class="mono">78%</span></div>
+                        <div class="meter-bar-bg"><div id="meter-gpu" class="meter-bar-fill warn" style="width: 78%;"></div></div>
+                    </div>
+                    <div class="meter-group">
+                        <div class="meter-label"><span>RAM</span><span id="meter-ram-val" class="mono">12.0GB / 16GB</span></div>
+                        <div class="meter-bar-bg"><div id="meter-ram" class="meter-bar-fill warn" style="width: 75%;"></div></div>
+                    </div>
+                    <div class="meter-group" style="margin-bottom: 0;">
+                        <div class="meter-label"><span>Storage (SDA1)</span><span id="meter-sto-val" class="mono">1.2TB / 4TB</span></div>
+                        <div class="meter-bar-bg"><div id="meter-sto" class="meter-bar-fill" style="width: 30%;"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7. Evidence Section -->
+            <div id="panel-evidence" class="panel">
+                <div class="panel-header">
+                    <span>Recent Evidence Packages</span>
+                    <span class="text-muted">STORED LOCALLY</span>
+                </div>
+                <div class="panel-content" style="padding: 0;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>EV-ID</th>
+                                <th>Time</th>
+                                <th>Camera</th>
+                                <th>Risk</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="evidence-body">
+                            <!-- Evidence rows generated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 8. ANPR Panel -->
+            <div id="panel-anpr" class="panel">
+                <div class="panel-header">
+                    <span>ANPR Log</span>
+                    <span class="text-muted">GATES C02/C03</span>
+                </div>
+                <div class="panel-content" style="padding: 0;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Plate</th>
+                                <th>Status</th>
+                                <th>Cam</th>
+                            </tr>
+                        </thead>
+                        <tbody id="anpr-body">
+                            <!-- ANPR rows generated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Data Simulation & UI Logic -->
+    <script>
+        /**
+         * BORDER-X AI 
+         * Data Simulation Module
+         * 
+         * Generates realistic surveillance event data independent of the UI layer.
+         * Designed to be easily replaced by a WebSocket handler later.
+         */
+        const DataSim = (function() {
+            let state = {
+                networkOnline: true,
+                syncQueue: [],
+                events: [],
+                cameras: [
+                    { id: 'C01', name: 'North Fence', status: 'ONLINE', fps: 24, detections: [] },
+                    { id: 'C02', name: 'Vehicle Gate', status: 'ONLINE', fps: 30, detections: [] },
+                    { id: 'C03', name: 'Patrol Road', status: 'ONLINE', fps: 24, detections: [] },
+                    { id: 'C04', name: 'Restricted Zone', status: 'ONLINE', fps: 15, detections: [] },
+                    { id: 'C05', name: 'East Perimeter', status: 'ONLINE', fps: 24, detections: [] },
+                    { id: 'C06', name: 'Thermal Overview', status: 'ONLINE', fps: 9, detections: [] }
+                ],
+                evidence: [],
+                anpr: [],
+                stats: { high: 14, attention: 42, normal: 342 }
+            };
+
+            const EVENT_TYPES = [
+                { type: 'Perimeter Breach', risk_level: 'HIGH', base_score: 90 },
+                { type: 'Restricted Zone Crossing', risk_level: 'HIGH', base_score: 85 },
+                { type: 'Loitering > 60s', risk_level: 'ATTENTION', base_score: 65 },
+                { type: 'Unidentified Vehicle', risk_level: 'ATTENTION', base_score: 70 },
+                { type: 'Person Detected', risk_level: 'NORMAL', base_score: 30 },
+                { type: 'Vehicle Detected', risk_level: 'NORMAL', base_score: 25 },
+                { type: 'Wildlife Detected', risk_level: 'NORMAL', base_score: 10 }
+            ];
+
+            const PLATES = ['ABC-1234', 'XYZ-9876', 'GVT-001', 'UNK-????', 'TRK-5542'];
+
+            let eventCounter = 10000;
+            let evidenceCounter = 5000;
+
+            function generateId() {
+                return 'TRK-' + Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+            }
+
+            function generateTimestamp() {
+                const now = new Date();
+                return now.toISOString().split('T')[1].split('.')[0]; // HH:MM:SS
+            }
+
+            function triggerEvent() {
+                const cam = state.cameras[Math.floor(Math.random() * state.cameras.length)];
+                
+                // Weight random to favor normal events
+                const rand = Math.random();
+                let eventDef;
+                if (rand > 0.95) eventDef = EVENT_TYPES[0]; // Breach
+                else if (rand > 0.90) eventDef = EVENT_TYPES[1]; // Zone
+                else if (rand > 0.80) eventDef = EVENT_TYPES[2]; // Loitering
+                else if (rand > 0.70) eventDef = EVENT_TYPES[3]; // Unidentified Vehicle
+                else if (rand > 0.40) eventDef = EVENT_TYPES[4]; // Person
+                else if (rand > 0.20) eventDef = EVENT_TYPES[5]; // Vehicle
+                else eventDef = EVENT_TYPES[6]; // Wildlife
+
+                const risk_score = Math.min(99, eventDef.base_score + Math.floor(Math.random() * 15));
+                
+                const event = {
+                    id: 'EVT-' + (++eventCounter),
+                    track_id: generateId(),
+                    camera_id: cam.id,
+                    event_type: eventDef.type,
+                    risk_score: risk_score,
+                    risk_level: eventDef.risk_level,
+                    timestamp: generateTimestamp(),
+                    duration: Math.floor(Math.random() * 120) + 's',
+                    sync_status: state.networkOnline ? 'SYNCED' : 'PENDING'
+                };
+
+                state.events.unshift(event);
+                if (state.events.length > 50) state.events.pop();
+
+                if (!state.networkOnline) {
+                    state.syncQueue.push(event.id);
+                }
+
+                // Update stats
+                if (event.risk_level === 'HIGH') state.stats.high++;
+                else if (event.risk_level === 'ATTENTION') state.stats.attention++;
+                else state.stats.normal++;
+
+                // Evidence generation for High/Attention
+                if (event.risk_level === 'HIGH' || (event.risk_level === 'ATTENTION' && Math.random() > 0.5)) {
+                    state.evidence.unshift({
+                        id: 'EVD-' + (++evidenceCounter),
+                        camera_id: event.camera_id,
+                        timestamp: event.timestamp,
+                        risk_level: event.risk_level,
+                        ref_event: event.id
+                    });
+                    if (state.evidence.length > 20) state.evidence.pop();
+                }
+
+                // ANPR generation if vehicle
+                if (event.event_type.includes('Vehicle') && (cam.id === 'C02' || cam.id === 'C03')) {
+                    const plate = PLATES[Math.floor(Math.random() * PLATES.length)];
+                    const status = plate.includes('UNK') ? 'UNKNOWN' : (Math.random() > 0.2 ? 'AUTHORIZED' : 'FLAGGED');
+                    state.anpr.unshift({
+                        plate: plate,
+                        camera_id: cam.id,
+                        timestamp: event.timestamp,
+                        status: status,
+                        confidence: Math.floor(80 + Math.random() * 19) + '%'
+                    });
+                    if (state.anpr.length > 20) state.anpr.pop();
+                }
+
+                // Temporary Camera Detection Bounding Box
+                cam.detections = [{
+                    label: event.event_type === 'Person Detected' ? 'PERSON' : (event.event_type.includes('Vehicle') ? 'VEHICLE' : 'OBJ'),
+                    x: Math.random() * 60 + 10,
+                    y: Math.random() * 60 + 10,
+                    w: Math.random() * 20 + 10,
+                    h: Math.random() * 30 + 15,
+                    color: event.risk_level === 'HIGH' ? 'var(--risk-high)' : (event.risk_level === 'ATTENTION' ? 'var(--risk-attention)' : 'var(--risk-normal)')
+                }];
+
+                // Clear detection after a brief moment
+                setTimeout(() => {
+                    cam.detections = [];
+                    if (window.UIHandler) window.UIHandler.onDataUpdate();
+                }, 2500);
+
+                if (window.UIHandler) window.UIHandler.onDataUpdate();
+            }
+
+            function toggleNetwork() {
+                state.networkOnline = !state.networkOnline;
+                if (state.networkOnline) {
+                    // Flush sync queue
+                    state.events.forEach(e => {
+                        if (e.sync_status === 'PENDING') e.sync_status = 'SYNCED';
+                    });
+                    state.syncQueue = [];
+                }
+                if (window.UIHandler) window.UIHandler.onDataUpdate();
+                return state.networkOnline;
+            }
+
+            // Start simulation loop
+            setInterval(() => {
+                if (Math.random() > 0.4) triggerEvent(); // 60% chance every tick
+            }, 3000);
+
+            // Hardware stats fluctuation
+            setInterval(() => {
+                if (window.UIHandler) window.UIHandler.updateHardwareStats();
+            }, 2000);
+
+            // Generate initial state
+            for(let i=0; i<15; i++) triggerEvent();
+
+            return {
+                getState: () => state,
+                toggleNetwork: toggleNetwork
+            };
+        })();
+
+        /**
+         * UI Rendering Module
+         * Separated from data generation.
+         */
+        window.UIHandler = (function() {
+            // DOM Elements Cache
+            const els = {
+                clock: document.getElementById('clock-display'),
+                cameras: document.getElementById('camera-grid'),
+                alerts: document.getElementById('alerts-list'),
+                timeline: document.getElementById('timeline-body'),
+                evidence: document.getElementById('evidence-body'),
+                anpr: document.getElementById('anpr-body'),
+                sysNetwork: document.getElementById('sys-network'),
+                topNetworkDot: document.getElementById('top-network-dot'),
+                topNetworkText: document.getElementById('top-network-text'),
+                sysSync: document.getElementById('sys-sync'),
+                btnOffline: document.getElementById('demo-offline-btn'),
+                sumHigh: document.getElementById('sum-high'),
+                sumAtt: document.getElementById('sum-att'),
+                sumNorm: document.getElementById('sum-norm'),
+                meterCpu: document.getElementById('meter-cpu'),
+                meterCpuVal: document.getElementById('meter-cpu-val'),
+                meterGpu: document.getElementById('meter-gpu'),
+                meterGpuVal: document.getElementById('meter-gpu-val'),
+                meterRam: document.getElementById('meter-ram'),
+                meterRamVal: document.getElementById('meter-ram-val')
+            };
+
+            function updateClock() {
+                const now = new Date();
+                els.clock.textContent = now.toISOString().split('T')[0] + ' ' + now.toTimeString().split(' ')[0];
+            }
+            setInterval(updateClock, 1000);
+            updateClock();
+
+            // Setup offline toggle
+            els.btnOffline.addEventListener('click', () => {
+                const isOnline = DataSim.toggleNetwork();
+                if (isOnline) {
+                    els.btnOffline.textContent = 'Simulate Offline';
+                    els.btnOffline.classList.remove('active');
+                } else {
+                    els.btnOffline.textContent = 'Reconnect';
+                    els.btnOffline.classList.add('active');
+                }
+            });
+
+            function getBadgeClass(level) {
+                if (level === 'HIGH') return 'badge-high';
+                if (level === 'ATTENTION') return 'badge-attention';
+                return 'badge-normal';
+            }
+
+            function getTextColor(level) {
+                if (level === 'HIGH') return 'text-high';
+                if (level === 'ATTENTION') return 'text-attention';
+                if (level === 'FLAGGED') return 'text-high';
+                if (level === 'UNKNOWN') return 'text-attention';
+                return 'text-normal';
+            }
+
+            function renderCameras(cameras) {
+                let html = '';
+                cameras.forEach(cam => {
+                    let detHtml = '';
+                    cam.detections.forEach(d => {
+                        detHtml += `
+                        <div class="bounding-box" style="left: ${d.x}%; top: ${d.y}%; width: ${d.w}%; height: ${d.h}%; border-color: ${d.color};">
+                            <div class="label" style="background-color: ${d.color};">${d.label}</div>
+                        </div>`;
+                    });
+
+                    // Fluctuate FPS slightly for realism
+                    const curFps = cam.fps - Math.floor(Math.random() * 2);
+
+                    html += `
+                    <div class="camera-feed">
+                        <div class="camera-noise"></div>
+                        <div class="camera-overlay">
+                            <div class="camera-top-bar">
+                                <span>${cam.id} - ${cam.name}</span>
+                                <span class="text-high" style="font-size: 9px; animation: blink 2s infinite;">&#9679; REC</span>
+                            </div>
+                            <div class="camera-bottom-bar">
+                                <span>${els.clock.textContent.split(' ')[1]}</span>
+                                <span>${curFps} FPS | DET: ${cam.detections.length}</span>
+                            </div>
+                        </div>
+                        ${detHtml}
+                    </div>`;
+                });
+                
+                // Add blink animation dynamically if not present
+                if (!document.getElementById('blink-anim')) {
+                    const style = document.createElement('style');
+                    style.id = 'blink-anim';
+                    style.innerHTML = `@keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }`;
+                    document.head.appendChild(style);
+                }
+                
+                els.cameras.innerHTML = html;
+            }
+
+            function renderAlerts(events) {
+                const alerts = events.filter(e => e.risk_level !== 'NORMAL').slice(0, 5);
+                let html = '';
+                alerts.forEach(a => {
+                    html += `
+                    <div class="list-item">
+                        <div class="list-item-header">
+                            <span class="badge ${getBadgeClass(a.risk_level)}">${a.risk_level}</span>
+                            <span class="mono text-muted" style="font-size: 11px;">${a.timestamp}</span>
+                        </div>
+                        <div style="font-weight: 600; font-size: 12px; margin-top: 2px;">${a.event_type}</div>
+                        <div class="list-item-body">
+                            <span class="mono">CAM: ${a.camera_id}</span>
+                            <span>SCORE: <span class="${getTextColor(a.risk_level)} fw-bold">${a.risk_score}</span></span>
+                        </div>
+                    </div>`;
+                });
+                els.alerts.innerHTML = html;
+            }
+
+            function renderTimeline(events) {
+                let html = '';
+                events.slice(0, 15).forEach(e => {
+                    const syncColor = e.sync_status === 'SYNCED' ? 'text-normal' : 'text-attention';
+                    html += `
+                    <tr>
+                        <td class="mono text-muted">${e.timestamp}</td>
+                        <td class="mono">${e.camera_id}</td>
+                        <td>${e.event_type}</td>
+                        <td class="${getTextColor(e.risk_level)} fw-bold">${e.risk_score}</td>
+                        <td class="${syncColor} fw-bold" style="font-size: 10px;">${e.sync_status}</td>
+                    </tr>`;
+                });
+                els.timeline.innerHTML = html;
+            }
+
+            function renderEvidence(evidence) {
+                let html = '';
+                evidence.slice(0, 10).forEach(e => {
+                    html += `
+                    <tr>
+                        <td class="mono text-muted">${e.id}</td>
+                        <td class="mono text-muted">${e.timestamp}</td>
+                        <td class="mono">${e.camera_id}</td>
+                        <td><span class="badge ${getBadgeClass(e.risk_level)}">${e.risk_level}</span></td>
+                        <td><button class="btn-view">VIEW</button></td>
+                    </tr>`;
+                });
+                els.evidence.innerHTML = html;
+            }
+
+            function renderANPR(anpr) {
+                let html = '';
+                anpr.slice(0, 10).forEach(a => {
+                    html += `
+                    <tr>
+                        <td class="mono font-weight-bold">${a.plate}</td>
+                        <td class="${getTextColor(a.status)} fw-bold" style="font-size: 11px;">${a.status}</td>
+                        <td class="mono text-muted">${a.camera_id}</td>
+                    </tr>`;
+                });
+                els.anpr.innerHTML = html;
+            }
+
+            function renderStats(stats) {
+                els.sumHigh.textContent = stats.high;
+                els.sumAtt.textContent = stats.attention;
+                els.sumNorm.textContent = stats.normal;
+            }
+
+            function renderNetworkStatus(isOnline, queueLength) {
+                if (isOnline) {
+                    els.sysNetwork.textContent = 'ONLINE';
+                    els.sysNetwork.className = 'text-normal font-weight-bold';
+                    els.topNetworkText.textContent = 'NETWORK ONLINE';
+                    els.topNetworkText.className = 'text-normal';
+                    els.topNetworkDot.className = 'status-dot online';
+                    els.sysSync.textContent = '0';
+                    els.sysSync.className = 'mono text-muted';
+                } else {
+                    els.sysNetwork.textContent = 'OFFLINE';
+                    els.sysNetwork.className = 'text-high font-weight-bold';
+                    els.topNetworkText.textContent = 'NETWORK OFFLINE - LOCAL MODE';
+                    els.topNetworkText.className = 'text-high';
+                    els.topNetworkDot.className = 'status-dot offline';
+                    els.sysSync.textContent = queueLength + ' PENDING';
+                    els.sysSync.className = 'mono text-attention';
+                }
+            }
+
+            function updateHardwareStats() {
+                const cpu = 35 + Math.floor(Math.random() * 15);
+                const gpu = 70 + Math.floor(Math.random() * 20);
+                const ram = 11.5 + (Math.random() * 1.5);
+                
+                els.meterCpuVal.textContent = cpu + '%';
+                els.meterCpu.style.width = cpu + '%';
+                
+                els.meterGpuVal.textContent = gpu + '%';
+                els.meterGpu.style.width = gpu + '%';
+                if (gpu > 85) els.meterGpu.className = 'meter-bar-fill crit';
+                else els.meterGpu.className = 'meter-bar-fill warn';
+
+                els.meterRamVal.textContent = ram.toFixed(1) + 'GB / 16GB';
+                const ramPct = (ram / 16) * 100;
+                els.meterRam.style.width = ramPct + '%';
+            }
+
+            // Public method exposed for DataSim to call when state changes
+            function onDataUpdate() {
+                const state = DataSim.getState();
+                renderCameras(state.cameras);
+                renderAlerts(state.events);
+                renderTimeline(state.events);
+                renderEvidence(state.evidence);
+                renderANPR(state.anpr);
+                renderStats(state.stats);
+                renderNetworkStatus(state.networkOnline, state.syncQueue.length);
+            }
+
+            // Initial render
+            onDataUpdate();
+
+            return {
+                onDataUpdate,
+                updateHardwareStats
+            };
+        })();
+    </script>
+</body>
+</html>
