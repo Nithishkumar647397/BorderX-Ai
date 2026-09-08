@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BORDER-X AI | Surveillance Command Dashboard</title>
@@ -13,18 +16,18 @@
             --bg-hover: #2a2a2a;
             --border: #333333;
             --border-light: #444444;
-            --text-main: #e0e0e0;
-            --text-muted: #888888;
+            --text-main: #f4f4f5;
+            --text-muted: #a1a1aa;
             --text-dark: #111111;
             
-            --risk-high: #d32f2f;
-            --risk-attention: #f57c00;
-            --risk-normal: #388e3c;
-            --risk-unknown: #757575;
+            --risk-high: #ef4444;
+            --risk-attention: #f59e0b;
+            --risk-normal: #22c55e;
+            --risk-unknown: #71717a;
             
-            --spacing: 8px;
-            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            --font-mono: 'Consolas', 'Courier New', monospace;
+            --spacing: 16px;
+            --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Consolas', monospace;
         }
 
         * {
@@ -37,7 +40,7 @@
             background-color: var(--bg-base);
             color: var(--text-main);
             font-family: var(--font-family);
-            font-size: 13px;
+            font-size: 14px;
             height: 100vh;
             display: flex;
             overflow: hidden;
@@ -53,16 +56,18 @@
         .fw-bold { font-weight: 700; }
         
         .badge {
-            padding: 2px 6px;
-            border-radius: 2px;
-            font-size: 10px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            display: inline-block;
+            text-align: center;
         }
-        .badge-high { background: var(--risk-high); color: var(--text-dark); }
-        .badge-attention { background: var(--risk-attention); color: var(--text-dark); }
-        .badge-normal { background: var(--risk-normal); color: var(--text-dark); }
+        .badge-high { background: var(--risk-high); color: #ffffff; text-shadow: 0 1px 2px rgba(0,0,0,0.4); }
+        .badge-attention { background: var(--risk-attention); color: #000000; }
+        .badge-normal { background: var(--risk-normal); color: #000000; }
         
         .mono { font-family: var(--font-mono); }
 
@@ -137,7 +142,7 @@
             align-items: center;
             justify-content: space-between;
             padding: 0 16px;
-            font-size: 13px;
+            font-size: 14px;
         }
 
         .top-bar-left, .top-bar-right {
@@ -191,11 +196,11 @@
         }
 
         .panel-header {
-            padding: 6px 12px;
+            padding: 12px 16px;
             background-color: var(--bg-header);
             border-bottom: 1px solid var(--border);
-            font-weight: 600;
-            font-size: 11px;
+            font-weight: 700;
+            font-size: 13px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             display: flex;
@@ -229,11 +234,13 @@
 
         .camera-feed {
             position: relative;
-            background-color: #050505;
+            background-color: #111;
             border: 1px solid var(--border-light);
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            box-shadow: inset 0 0 60px rgba(0,0,0,0.9);
+            filter: grayscale(15%) contrast(105%);
         }
 
         /* Fake CCTV noise effect using CSS */
@@ -248,16 +255,26 @@
         .camera-overlay {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            padding: 8px;
+            padding: 12px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             z-index: 2;
             pointer-events: none;
             font-family: var(--font-mono);
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.85);
-            text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.95);
+            text-shadow: 1px 1px 3px rgba(0,0,0,1);
+        }
+        .rec-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: #ef4444;
+            border-radius: 50%;
+            margin-right: 6px;
+            box-shadow: 0 0 4px #ef4444;
+            animation: blink 2s infinite;
         }
 
         .camera-top-bar, .camera-bottom-bar {
@@ -289,11 +306,11 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 12px;
+            font-size: 13px;
         }
 
         th, td {
-            padding: 6px 10px;
+            padding: 10px 14px;
             text-align: left;
             border-bottom: 1px solid var(--border);
             white-space: nowrap;
@@ -306,21 +323,23 @@
             top: 0;
             background-color: var(--bg-panel);
             z-index: 5;
-            font-size: 11px;
+            font-size: 12px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
+        
+        .text-right { text-align: right; }
 
         tbody tr:hover {
             background-color: var(--bg-hover);
         }
 
         .list-item {
-            padding: 10px;
+            padding: 12px 16px;
             border-bottom: 1px solid var(--border);
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 8px;
         }
 
         .list-item:hover {
@@ -388,7 +407,7 @@
         .summary-stats {
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 20px;
             height: 100%;
             justify-content: center;
         }
@@ -398,7 +417,8 @@
             justify-content: space-between;
         }
         .stat-label {
-            font-size: 11px;
+            font-size: 12px;
+            font-weight: 600;
             text-transform: uppercase;
             width: 80px;
             color: var(--text-muted);
@@ -407,19 +427,54 @@
             font-size: 18px;
             font-weight: 700;
             font-family: var(--font-mono);
-            width: 40px;
+            width: 50px;
             text-align: right;
         }
         .stat-bar {
             flex: 1;
-            height: 4px;
+            height: 8px;
             margin: 0 16px;
-            background: var(--border);
+            background: #222;
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid var(--border);
         }
         .stat-bar-inner {
             height: 100%;
+            border-radius: 3px;
         }
 
+
+        /* Glance Strip */
+        #glance-strip {
+            display: flex;
+            align-items: center;
+            background-color: var(--bg-panel);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 24px;
+            gap: 48px;
+        }
+        .glance-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .glance-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+        .glance-value {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .glance-divider {
+            width: 1px;
+            height: 32px;
+            background-color: var(--border);
+        }
         /* Scrollbar */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: var(--bg-panel); }
@@ -481,6 +536,29 @@
                 <div class="mono text-muted" style="font-size: 11px;">OP: J.SMITH [ID: 9402]</div>
             </div>
         </header>
+
+        <!-- At A Glance Strip -->
+        <div id="glance-strip">
+            <div class="glance-item">
+                <span class="glance-label">ACTIVE HIGH-RISK</span>
+                <span class="glance-value text-high mono" id="glance-high-risk">0</span>
+            </div>
+            <div class="glance-divider"></div>
+            <div class="glance-item">
+                <span class="glance-label">CAMERAS ONLINE</span>
+                <span class="glance-value mono">6/6</span>
+            </div>
+            <div class="glance-divider"></div>
+            <div class="glance-item">
+                <span class="glance-label">SYNC QUEUE</span>
+                <span class="glance-value mono" id="glance-sync">0</span>
+            </div>
+            <div class="glance-divider"></div>
+            <div class="glance-item">
+                <span class="glance-label">NETWORK</span>
+                <span class="glance-value text-normal" id="glance-network">ONLINE</span>
+            </div>
+        </div>
 
         <!-- Dashboard Grid -->
         <main id="dashboard-grid">
@@ -549,8 +627,8 @@
                                 <th>Time</th>
                                 <th>Cam</th>
                                 <th>Type</th>
-                                <th>Score</th>
-                                <th>Sync</th>
+                                <th class="text-right">Score</th>
+                                <th class="text-right">Sync</th>
                             </tr>
                         </thead>
                         <tbody id="timeline-body">
@@ -619,7 +697,7 @@
                                 <th>Time</th>
                                 <th>Camera</th>
                                 <th>Risk</th>
-                                <th>Action</th>
+                                <th class="text-right">Action</th>
                             </tr>
                         </thead>
                         <tbody id="evidence-body">
@@ -641,7 +719,7 @@
                             <tr>
                                 <th>Plate</th>
                                 <th>Status</th>
-                                <th>Cam</th>
+                                <th class="text-right">Cam</th>
                             </tr>
                         </thead>
                         <tbody id="anpr-body">
@@ -904,7 +982,7 @@
                         <div class="camera-overlay">
                             <div class="camera-top-bar">
                                 <span>${cam.id} - ${cam.name}</span>
-                                <span class="text-high" style="font-size: 9px; animation: blink 2s infinite;">&#9679; REC</span>
+                                <span class="text-high" style="font-size: 11px; display: flex; align-items: center; font-weight: 600;"><span class="rec-dot"></span>REC</span>
                             </div>
                             <div class="camera-bottom-bar">
                                 <span>${els.clock.textContent.split(' ')[1]}</span>
@@ -955,8 +1033,8 @@
                         <td class="mono text-muted">${e.timestamp}</td>
                         <td class="mono">${e.camera_id}</td>
                         <td>${e.event_type}</td>
-                        <td class="${getTextColor(e.risk_level)} fw-bold">${e.risk_score}</td>
-                        <td class="${syncColor} fw-bold" style="font-size: 10px;">${e.sync_status}</td>
+                        <td class="${getTextColor(e.risk_level)} fw-bold mono text-right">${e.risk_score}</td>
+                        <td class="${syncColor} fw-bold text-right" style="font-size: 11px;">${e.sync_status}</td>
                     </tr>`;
                 });
                 els.timeline.innerHTML = html;
@@ -971,7 +1049,7 @@
                         <td class="mono text-muted">${e.timestamp}</td>
                         <td class="mono">${e.camera_id}</td>
                         <td><span class="badge ${getBadgeClass(e.risk_level)}">${e.risk_level}</span></td>
-                        <td><button class="btn-view">VIEW</button></td>
+                        <td class="text-right"><button class="btn-view">VIEW</button></td>
                     </tr>`;
                 });
                 els.evidence.innerHTML = html;
@@ -984,7 +1062,7 @@
                     <tr>
                         <td class="mono font-weight-bold">${a.plate}</td>
                         <td class="${getTextColor(a.status)} fw-bold" style="font-size: 11px;">${a.status}</td>
-                        <td class="mono text-muted">${a.camera_id}</td>
+                        <td class="mono text-muted text-right">${a.camera_id}</td>
                     </tr>`;
                 });
                 els.anpr.innerHTML = html;
@@ -994,6 +1072,9 @@
                 els.sumHigh.textContent = stats.high;
                 els.sumAtt.textContent = stats.attention;
                 els.sumNorm.textContent = stats.normal;
+                
+                const glanceHigh = document.getElementById('glance-high-risk');
+                if (glanceHigh) glanceHigh.textContent = stats.high;
             }
 
             function renderNetworkStatus(isOnline, queueLength) {
@@ -1013,6 +1094,19 @@
                     els.topNetworkDot.className = 'status-dot offline';
                     els.sysSync.textContent = queueLength + ' PENDING';
                     els.sysSync.className = 'mono text-attention';
+                }
+                
+                const glanceSync = document.getElementById('glance-sync');
+                const glanceNet = document.getElementById('glance-network');
+                if (glanceSync) glanceSync.textContent = isOnline ? '0' : queueLength;
+                if (glanceNet) {
+                    if (isOnline) {
+                        glanceNet.textContent = 'ONLINE';
+                        glanceNet.className = 'glance-value text-normal';
+                    } else {
+                        glanceNet.textContent = 'OFFLINE';
+                        glanceNet.className = 'glance-value text-high';
+                    }
                 }
             }
 
