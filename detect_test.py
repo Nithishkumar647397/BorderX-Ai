@@ -6,6 +6,15 @@ import datetime
 import time
 
 LOITER_THRESHOLD_SECONDS = 90
+RISK_ZONE_CROSSING = 40
+RISK_LOITERING = 20
+RISK_THRESHOLD_ATTENTION = 30
+RISK_THRESHOLD_HIGH = 60
+
+def get_risk_level(score):
+    if score >= RISK_THRESHOLD_HIGH: return "HIGH RISK"
+    if score >= RISK_THRESHOLD_ATTENTION: return "ATTENTION"
+    return "NORMAL"
 
 def run_detection(video_source="0", event_callback=None):
     # Determine if video_source is a file path or a camera index
@@ -106,12 +115,18 @@ def run_detection(video_source="0", event_callback=None):
                     is_inside = test_result >= 0
                     
                     if track_id not in zone_status:
-                        zone_status[track_id] = {'is_inside': False, 'outside_frames': 5, 'entry_time': None, 'loiter_event_fired': False}
+                        zone_status[track_id] = {'is_inside': False, 'outside_frames': 5, 'entry_time': None, 'loiter_event_fired': False, 'risk_score': 0, 'risk_level': 'NORMAL', 'risk_reasons': []}
                         
                     status = zone_status[track_id]
                     
+                    if status['risk_level'] == "HIGH RISK":
+                        color = (0, 0, 255)
+                    elif status['risk_level'] == "ATTENTION":
+                        color = (0, 165, 255)
+                    else:
+                        color = (0, 255, 0)
+                    
                     if is_inside:
-                        color = (0, 0, 255) # Red for inside
                         if track_frames[track_id] >= 10:
                             if not status['is_inside'] and status['outside_frames'] >= 5:
                                 timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -129,6 +144,13 @@ def run_detection(video_source="0", event_callback=None):
                                     
                                 status['entry_time'] = time.time()
                                 status['loiter_event_fired'] = False
+                                
+                                status['risk_score'] += RISK_ZONE_CROSSING
+                                status['risk_reasons'].append("Restricted Zone Crossing")
+                                new_level = get_risk_level(status['risk_score'])
+                                if new_level != status['risk_level']:
+                                    status['risk_level'] = new_level
+                                    print(f"[RISK] Track ID: {track_id} - Level: {new_level} - Score: {status['risk_score']} - Reasons: {', '.join(status['risk_reasons'])}")
                                 
                             status['is_inside'] = True
                             status['outside_frames'] = 0
@@ -149,6 +171,13 @@ def run_detection(video_source="0", event_callback=None):
                                             "risk_score": 90,
                                             "risk_level": "High"
                                         })
+                                        
+                                    status['risk_score'] += RISK_LOITERING
+                                    status['risk_reasons'].append(f"Loitering {elapsed:.1f}s")
+                                    new_level = get_risk_level(status['risk_score'])
+                                    if new_level != status['risk_level']:
+                                        status['risk_level'] = new_level
+                                        print(f"[RISK] Track ID: {track_id} - Level: {new_level} - Score: {status['risk_score']} - Reasons: {', '.join(status['risk_reasons'])}")
                                 
                                 cv2.putText(frame, f"In Zone: {int(elapsed)}s", (x1, y2 + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
                     else:
@@ -157,11 +186,17 @@ def run_detection(video_source="0", event_callback=None):
                         if status['outside_frames'] >= 5:
                             status['entry_time'] = None
                             status['loiter_event_fired'] = False
+                            status['risk_score'] = 0
+                            status['risk_level'] = 'NORMAL'
+                            status['risk_reasons'] = []
 
                 # Print to terminal
                 if track_id is not None:
                     print(f"Detected: {cls_name} | ID: {track_id} | Confidence: {conf:.2f} | BBox: ({x1}, {y1}, {x2}, {y2})")
-                    label = f"ID:{track_id} {cls_name} {conf:.2f}"
+                    if track_id in zone_status:
+                        label = f"ID:{track_id} | Risk: {zone_status[track_id]['risk_score']} ({zone_status[track_id]['risk_level']})"
+                    else:
+                        label = f"ID:{track_id} {cls_name} {conf:.2f}"
                 else:
                     print(f"Detected: {cls_name} | Confidence: {conf:.2f} | BBox: ({x1}, {y1}, {x2}, {y2})")
                     label = f"{cls_name} {conf:.2f}"
@@ -178,6 +213,9 @@ def run_detection(video_source="0", event_callback=None):
                 if status['outside_frames'] >= 5:
                     status['entry_time'] = None
                     status['loiter_event_fired'] = False
+                    status['risk_score'] = 0
+                    status['risk_level'] = 'NORMAL'
+                    status['risk_reasons'] = []
 
         if event_callback and current_frame_tracks:
             event_callback({
