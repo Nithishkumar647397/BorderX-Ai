@@ -285,12 +285,14 @@
         .camera-feed {
             position: relative;
             background-color: #111;
+            background-size: cover;
+            background-position: center;
             border: 1px solid var(--border-light);
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            box-shadow: inset 0 0 60px rgba(0,0,0,0.9);
-            filter: grayscale(15%) contrast(105%);
+            box-shadow: inset 0 0 80px rgba(0,0,0,0.85);
+            filter: grayscale(80%) contrast(110%);
             border-radius: 4px;
             cursor: pointer;
             transition: border-color 0.2s;
@@ -300,13 +302,20 @@
             border-color: var(--text-muted);
         }
 
-        /* Fake CCTV noise effect using CSS */
         .camera-noise {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)" opacity="0.08"/%3E%3C/svg%3E');
+            background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.95" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)" opacity="0.12"/%3E%3C/svg%3E');
             pointer-events: none;
             z-index: 1;
+        }
+        
+        .tracks-layer {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 2;
+            pointer-events: none;
+            overflow: hidden;
         }
 
         .camera-overlay {
@@ -358,6 +367,7 @@
             margin-top: -18px;
             margin-left: -2px;
             white-space: nowrap;
+            text-shadow: none;
         }
 
         /* Tables and Lists */
@@ -841,19 +851,27 @@
 
     <!-- Data Simulation & UI Logic -->
     <script>
-        
+        const SVGS = {
+            'C01': `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect width="400" height="300" fill="%232a2a2a"/><rect y="200" width="400" height="100" fill="%233a3a3a"/><line x1="0" y1="200" x2="400" y2="200" stroke="%23111" stroke-width="4"/><path d="M50,150 v150 M150,150 v150 M250,150 v150 M350,150 v150 M0,180 h400 M0,210 h400" stroke="%23111" stroke-width="2" opacity="0.6"/></svg>`,
+            'C02': `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect width="400" height="300" fill="%23252525"/><path d="M150,300 L180,180 L220,180 L250,300 Z" fill="%23333"/><rect x="80" y="160" width="20" height="140" fill="%23111"/><rect x="300" y="160" width="20" height="140" fill="%23111"/><rect x="80" y="180" width="120" height="10" fill="%23111"/></svg>`,
+            'C03': `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect width="400" height="300" fill="%232d2d2d"/><path d="M0,300 L180,150 L220,150 L400,300 Z" fill="%233a3a3a"/><line x1="200" y1="150" x2="200" y2="300" stroke="%23444" stroke-width="2" stroke-dasharray="10,10"/></svg>`,
+            'C04': `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect width="400" height="300" fill="%23222"/><rect y="100" width="400" height="200" fill="%23333"/><polygon points="80,150 320,150 360,280 40,280" fill="none" stroke="%23f59e0b" stroke-width="2" stroke-dasharray="8,4" opacity="0.5"/></svg>`,
+            'C05': `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect width="400" height="300" fill="%232a2a2a"/><rect y="180" width="400" height="120" fill="%233a3a3a"/><path d="M50,180 Q60,150 70,180 M150,180 Q170,140 190,180 M300,180 Q320,130 340,180" fill="%23111"/></svg>`,
+            'C06': `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect width="400" height="300" fill="%231e293b"/><rect y="160" width="400" height="140" fill="%23334155"/><path d="M100,160 Q150,100 200,160 T300,160" fill="none" stroke="%2394a3b8" stroke-width="2" opacity="0.4"/></svg>`
+        };
+
         const DataSim = (function() {
             let state = {
                 networkOnline: true,
                 syncQueue: [],
                 events: [],
                 cameras: [
-                    { id: 'C01', name: 'North Fence', status: 'ONLINE', fps: 24, detections: [] },
-                    { id: 'C02', name: 'Vehicle Gate', status: 'ONLINE', fps: 30, detections: [] },
-                    { id: 'C03', name: 'Patrol Road', status: 'ONLINE', fps: 24, detections: [] },
-                    { id: 'C04', name: 'Restricted Zone', status: 'ONLINE', fps: 15, detections: [] },
-                    { id: 'C05', name: 'East Perimeter', status: 'ONLINE', fps: 24, detections: [] },
-                    { id: 'C06', name: 'Thermal Overview', status: 'ONLINE', fps: 9, detections: [] }
+                    { id: 'C01', name: 'North Fence', status: 'ONLINE', fps: 24, tracks: [] },
+                    { id: 'C02', name: 'Vehicle Gate', status: 'ONLINE', fps: 30, tracks: [] },
+                    { id: 'C03', name: 'Patrol Road', status: 'ONLINE', fps: 24, tracks: [] },
+                    { id: 'C04', name: 'Restricted Zone', status: 'ONLINE', fps: 15, tracks: [] },
+                    { id: 'C05', name: 'East Perimeter', status: 'ONLINE', fps: 24, tracks: [] },
+                    { id: 'C06', name: 'Thermal Overview', status: 'ONLINE', fps: 9, tracks: [] }
                 ],
                 evidence: [],
                 anpr: [],
@@ -945,21 +963,7 @@
                     });
                     if (state.anpr.length > 20) state.anpr.pop();
                 }
-
-                cam.detections = [{
-                    label: event.event_type === 'Person Detected' ? 'PERSON' : (event.event_type.includes('Vehicle') ? 'VEHICLE' : 'OBJ'),
-                    x: Math.random() * 60 + 10,
-                    y: Math.random() * 60 + 10,
-                    w: Math.random() * 20 + 10,
-                    h: Math.random() * 30 + 15,
-                    color: event.risk_level === 'HIGH' ? 'var(--risk-high)' : (event.risk_level === 'ATTENTION' ? 'var(--risk-attention)' : 'var(--risk-normal)')
-                }];
-
-                setTimeout(() => {
-                    cam.detections = [];
-                    if (window.UIHandler) window.UIHandler.onDataUpdate();
-                }, 2500);
-
+                
                 if (window.UIHandler) window.UIHandler.onDataUpdate();
             }
 
@@ -974,6 +978,72 @@
                 if (window.UIHandler) window.UIHandler.onDataUpdate();
                 return state.networkOnline;
             }
+
+            // Tracking simulation loop
+            setInterval(() => {
+                const now = Date.now();
+                let tracksChanged = false;
+                
+                state.cameras.forEach(cam => {
+                    if (!cam.tracks) cam.tracks = [];
+                    
+                    // Remove expired tracks
+                    const initialLen = cam.tracks.length;
+                    cam.tracks = cam.tracks.filter(t => now - t.startTs < t.duration);
+                    if (cam.tracks.length !== initialLen) tracksChanged = true;
+                    
+                    // Update specific logic (C04 zone crossing)
+                    if (cam.id === 'C04') {
+                        cam.tracks.forEach(t => {
+                            const progress = (now - t.startTs) / t.duration;
+                            const curX = t.startX + (t.endX - t.startX) * progress;
+                            const curY = t.startY + (t.endY - t.startY) * progress;
+                            // Zone roughly 20% to 90% X, 50% to 93% Y
+                            if (curX > 20 && curX < 90 && curY > 50 && curY < 93) {
+                                if (t.color === 'var(--risk-normal)') {
+                                    t.color = 'var(--risk-attention)'; // amber
+                                    tracksChanged = true;
+                                }
+                            }
+                        });
+                    }
+                    
+                    // Randomly add new tracks
+                    if (cam.tracks.length < 3 && Math.random() > 0.7) {
+                        const isPerson = Math.random() > 0.5;
+                        const cls = isPerson ? 'person' : 'vehicle';
+                        const conf = (0.80 + Math.random() * 0.19).toFixed(2);
+                        const idNum = Math.floor(Math.random() * 100);
+                        const label = `ID:${idNum} ${cls} ${conf}`;
+                        
+                        const isHighRisk = Math.random() > 0.95;
+                        const baseColor = isHighRisk ? 'var(--risk-high)' : 'var(--risk-normal)';
+                        
+                        // spawn left or right
+                        const startX = Math.random() > 0.5 ? -15 : 100;
+                        const endX = startX < 0 ? 100 : -15;
+                        const startY = 30 + Math.random() * 40;
+                        const endY = startY + (Math.random() * 20 - 10);
+                        
+                        cam.tracks.push({
+                            id: Math.random().toString(36).substr(2, 9),
+                            label,
+                            startX, startY, endX, endY,
+                            w: isPerson ? 6 : 14,
+                            h: isPerson ? 18 : 12,
+                            duration: 4000 + Math.random() * 3000,
+                            color: baseColor,
+                            startTs: now
+                        });
+                        tracksChanged = true;
+                    }
+                });
+                
+                if (tracksChanged && window.UIHandler) {
+                    window.UIHandler.onTracksUpdate();
+                }
+                
+            }, 500);
 
             setInterval(() => {
                 if (Math.random() > 0.4) triggerEvent();
@@ -990,7 +1060,7 @@
                 toggleNetwork: toggleNetwork
             };
         })();
-        
+
         window.UIHandler = (function() {
             // Sidebar Navigation Logic
             const navItems = document.querySelectorAll('.nav-item');
@@ -1012,7 +1082,6 @@
                 });
             });
 
-            // DOM Elements Cache
             const els = {
                 clock: document.getElementById('clock-display'),
                 camerasOverview: document.getElementById('camera-grid-overview'),
@@ -1081,19 +1150,13 @@
                 }
 
                 cameras.forEach(cam => {
-                    let detHtml = '';
-                    cam.detections.forEach(d => {
-                        detHtml += `
-                        <div class="bounding-box" style="left: ${d.x}%; top: ${d.y}%; width: ${d.w}%; height: ${d.h}%; border-color: ${d.color};">
-                            <div class="label" style="background-color: ${d.color};">${d.label}</div>
-                        </div>`;
-                    });
-
+                    const bgUrl = SVGS[cam.id] || SVGS['C01'];
                     const curFps = cam.fps - Math.floor(Math.random() * 2);
 
                     html += `
-                    <div class="camera-feed">
+                    <div class="camera-feed" data-cam="${cam.id}" style="background-image: url('${bgUrl}');">
                         <div class="camera-noise"></div>
+                        <div class="tracks-layer"></div>
                         <div class="camera-overlay">
                             <div class="camera-top-bar">
                                 <span>${cam.id} - ${cam.name}</span>
@@ -1101,23 +1164,86 @@
                             </div>
                             <div class="camera-bottom-bar">
                                 <span>${els.clock.textContent.split(' ')[1] || '00:00:00'}</span>
-                                <span>${curFps} FPS | DET: ${cam.detections.length}</span>
+                                <span class="fps-det-label">${curFps} FPS | DET: <span class="det-count">0</span></span>
                             </div>
                         </div>
-                        ${detHtml}
                     </div>`;
                 });
                 return html;
             }
 
+            let camerasRendered = false;
+
             function renderCameras(cameras) {
-                const camHtml = generateCameraHTML(cameras);
-                els.camerasOverview.innerHTML = camHtml;
-                els.camerasFull.innerHTML = camHtml;
+                if (!camerasRendered) {
+                    const camHtml = generateCameraHTML(cameras);
+                    els.camerasOverview.innerHTML = camHtml;
+                    els.camerasFull.innerHTML = camHtml;
+                    camerasRendered = true;
+                }
+            }
+
+            function onTracksUpdate() {
+                const state = DataSim.getState();
+                state.cameras.forEach(cam => {
+                    const containers = document.querySelectorAll(`.camera-feed[data-cam="${cam.id}"]`);
+                    
+                    containers.forEach(container => {
+                        const layer = container.querySelector('.tracks-layer');
+                        if (!layer) return;
+                        
+                        // Update detection count
+                        const detCount = container.querySelector('.det-count');
+                        if (detCount) detCount.textContent = cam.tracks.length;
+
+                        const existingIds = Array.from(layer.children).map(c => c.id);
+                        const currentIds = cam.tracks.map(t => 'box-' + t.id);
+                        
+                        // Remove expired
+                        existingIds.forEach(id => {
+                            if (!currentIds.includes(id)) {
+                                layer.querySelector('#'+id).remove();
+                            }
+                        });
+                        
+                        // Add or update
+                        cam.tracks.forEach(t => {
+                            const elId = 'box-' + t.id;
+                            let el = layer.querySelector('#'+elId);
+                            if (!el) {
+                                el = document.createElement('div');
+                                el.id = elId;
+                                el.className = 'bounding-box';
+                                el.innerHTML = `<div class="label" style="background-color: ${t.color}">${t.label}</div>`;
+                                el.style.left = t.startX + '%';
+                                el.style.top = t.startY + '%';
+                                el.style.width = t.w + '%';
+                                el.style.height = t.h + '%';
+                                el.style.borderColor = t.color;
+                                // Add to DOM
+                                layer.appendChild(el);
+                                
+                                // Force reflow then start transition to target
+                                requestAnimationFrame(() => {
+                                    requestAnimationFrame(() => {
+                                        el.style.transition = `left ${t.duration}ms linear, top ${t.duration}ms linear, border-color 0.5s`;
+                                        el.style.left = t.endX + '%';
+                                        el.style.top = t.endY + '%';
+                                    });
+                                });
+                            } else {
+                                // Dynamic color update (e.g. entering zone)
+                                if (el.style.borderColor !== t.color) {
+                                    el.style.borderColor = t.color;
+                                    el.querySelector('.label').style.backgroundColor = t.color;
+                                }
+                            }
+                        });
+                    });
+                });
             }
 
             function renderAlerts(events) {
-                // Top 3 for Overview
                 const alerts = events.filter(e => e.risk_level !== 'NORMAL').slice(0, 3);
                 let html = '';
                 alerts.forEach(a => {
@@ -1263,6 +1389,7 @@
 
             return {
                 onDataUpdate,
+                onTracksUpdate,
                 updateHardwareStats
             };
         })();
