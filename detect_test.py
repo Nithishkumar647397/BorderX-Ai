@@ -4,6 +4,38 @@ from ultralytics import YOLO
 import numpy as np
 import datetime
 import time
+import sqlite3
+
+def init_db():
+    conn = sqlite3.connect('events.db')
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS events (
+            event_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            track_id INTEGER,
+            camera_id TEXT DEFAULT 'C01',
+            event_type TEXT,
+            risk_score INTEGER,
+            risk_level TEXT,
+            timestamp TEXT,
+            reasons TEXT,
+            sync_status TEXT DEFAULT 'pending'
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+def insert_event(track_id, event_type, risk_score, risk_level, reasons):
+    conn = sqlite3.connect('events.db')
+    cursor = conn.cursor()
+    timestamp = datetime.datetime.now().isoformat()
+    cursor.execute('''
+        INSERT INTO events (track_id, camera_id, event_type, risk_score, risk_level, timestamp, reasons, sync_status)
+        VALUES (?, 'C01', ?, ?, ?, ?, ?, 'pending')
+    ''', (track_id, event_type, risk_score, risk_level, timestamp, reasons))
+    conn.commit()
+    conn.close()
+
 
 LOITER_THRESHOLD_SECONDS = 90
 RISK_ZONE_CROSSING = 40
@@ -17,6 +49,7 @@ def get_risk_level(score):
     return "NORMAL"
 
 def run_detection(video_source="0", event_callback=None):
+    init_db()
     # Determine if video_source is a file path or a camera index
     source = video_source
     if isinstance(source, str) and source.isdigit():
@@ -131,6 +164,7 @@ def run_detection(video_source="0", event_callback=None):
                             if not status['is_inside'] and status['outside_frames'] >= 5:
                                 timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                                 print(f"[EVENT] Restricted Zone Crossing - Track ID: {track_id} - Time: {timestamp}")
+                                insert_event(track_id, "zone_crossing", status['risk_score'], status['risk_level'], "Restricted Zone Crossing")
                                 
                                 if event_callback:
                                     event_callback({
@@ -151,6 +185,7 @@ def run_detection(video_source="0", event_callback=None):
                                 if new_level != status['risk_level']:
                                     status['risk_level'] = new_level
                                     print(f"[RISK] Track ID: {track_id} - Level: {new_level} - Score: {status['risk_score']} - Reasons: {', '.join(status['risk_reasons'])}")
+                                    insert_event(track_id, "risk_change", status['risk_score'], new_level, ', '.join(status['risk_reasons']))
                                 
                             status['is_inside'] = True
                             status['outside_frames'] = 0
@@ -160,6 +195,7 @@ def run_detection(video_source="0", event_callback=None):
                                 if elapsed >= LOITER_THRESHOLD_SECONDS and not status['loiter_event_fired']:
                                     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                                     print(f"[EVENT] LOITERING DETECTED - Track ID: {track_id} - Duration: {elapsed:.1f}s - Time: {timestamp}")
+                                    insert_event(track_id, "loitering", status['risk_score'], status['risk_level'], f"Loitering {elapsed:.1f}s")
                                     status['loiter_event_fired'] = True
                                     
                                     if event_callback:
@@ -178,6 +214,7 @@ def run_detection(video_source="0", event_callback=None):
                                     if new_level != status['risk_level']:
                                         status['risk_level'] = new_level
                                         print(f"[RISK] Track ID: {track_id} - Level: {new_level} - Score: {status['risk_score']} - Reasons: {', '.join(status['risk_reasons'])}")
+                                        insert_event(track_id, "risk_change", status['risk_score'], new_level, ', '.join(status['risk_reasons']))
                                 
                                 cv2.putText(frame, f"In Zone: {int(elapsed)}s", (x1, y2 + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
                     else:
